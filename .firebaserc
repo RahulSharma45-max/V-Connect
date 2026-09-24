@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "v-comm-25582"
-  }
+    "default": "v-connect-eac00"
+  },
+  "targets": {},
+  "etags": {}
 }

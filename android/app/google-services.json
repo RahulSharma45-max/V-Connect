@@ -1,14 +1,13 @@
 {
   "project_info": {
-    "project_number": "335005047323",
-    "firebase_url": "https://v-comm-25582-default-rtdb.firebaseio.com",
-    "project_id": "v-comm-25582",
-    "storage_bucket": "v-comm-25582.firebasestorage.app"
+    "project_number": "1076369172527",
+    "project_id": "v-connect-eac00",
+    "storage_bucket": "v-connect-eac00.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:335005047323:android:8fec23c827fd9046c176be",
+        "mobilesdk_app_id": "1:1076369172527:android:fba4f0638bb1a66c803eda",
         "android_client_info": {
           "package_name": "com.example.v_comm"
         }
@@ -16,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA4RCRI-QaLGH11tt1m5UC_NcwEtjfu_pA"
+          "current_key": "AIzaSyAxwpKUt2HwrHGZOEJWMElMWCxbdkkA3pA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076369172527:android:c78d21eb0ea442c0803eda",
+        "android_client_info": {
+          "package_name": "com.vconnect.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxwpKUt2HwrHGZOEJWMElMWCxbdkkA3pA"
         }
       ],
       "services": {

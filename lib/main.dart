@@ -4,9 +4,9 @@ import 'firebase_options.dart';
 import 'package:flutter/services.dart';
 // ignore: depend_on_referenced_packages
 import 'package:google_fonts/google_fonts.dart';
-import 'package:v_comm/LoginPage/login_page.dart';
-import 'package:v_comm/HomePage/homepage.dart';
-import 'package:v_comm/auth_gate.dart';
+import 'package:v_connect/LoginPage/login_page.dart';
+import 'package:v_connect/HomePage/homepage.dart';
+import 'package:v_connect/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

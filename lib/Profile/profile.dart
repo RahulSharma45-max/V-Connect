@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:v_comm/LoginPage/login_page.dart';
-import 'package:v_comm/Profile/edit_profile.dart';
+import 'package:v_connect/LoginPage/login_page.dart';
+import 'package:v_connect/Profile/edit_profile.dart';
 // Note: You will need to create this page if it doesn't exist
-// import 'package:v_comm/Profile/notification_settings_page.dart';
+// import 'package:v_connect/Profile/notification_settings_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

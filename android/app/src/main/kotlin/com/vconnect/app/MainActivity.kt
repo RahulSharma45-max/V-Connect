@@ -1,4 +1,4 @@
-package com.example.v_comm
+package com.vconnect.app
 
 import io.flutter.embedding.android.FlutterActivity
 

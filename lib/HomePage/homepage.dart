@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:image_picker/image_picker.dart';
-import 'package:v_comm/HomePage/navigation_bar.dart';
-import 'package:v_comm/HomePage/profile_card.dart';
+import 'package:v_connect/HomePage/navigation_bar.dart';
+import 'package:v_connect/HomePage/profile_card.dart';
 import 'package:photo_view/photo_view.dart';
 
 class Homepage extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:v_comm/Chat/chat_page.dart';
+import 'package:v_connect/Chat/chat_page.dart';
 import 'package:photo_view/photo_view.dart';
 
 class UserDetailsPopup extends StatelessWidget {

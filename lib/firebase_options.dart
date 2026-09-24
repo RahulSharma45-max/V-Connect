@@ -41,54 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAZyO5umKV4IwAlFexqLBOqkJz_W_MHt9M',
-    appId: '1:335005047323:web:474db2c08784b789c176be',
-    messagingSenderId: '335005047323',
-    projectId: 'v-comm-25582',
-    authDomain: 'v-comm-25582.firebaseapp.com',
-    databaseURL: 'https://v-comm-25582-default-rtdb.firebaseio.com',
-    storageBucket: 'v-comm-25582.firebasestorage.app',
-    measurementId: 'G-DHT36PTRQV',
+    apiKey: 'AIzaSyDj6RbT7ibDvEV_ZjeS5iO9_0e0USgmXFg',
+    appId: '1:1076369172527:web:86c45fd25867e3d2803eda',
+    messagingSenderId: '1076369172527',
+    projectId: 'v-connect-eac00',
+    authDomain: 'v-connect-eac00.firebaseapp.com',
+    storageBucket: 'v-connect-eac00.firebasestorage.app',
+    measurementId: 'G-290QTP28Y7',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA4RCRI-QaLGH11tt1m5UC_NcwEtjfu_pA',
-    appId: '1:335005047323:android:8fec23c827fd9046c176be',
-    messagingSenderId: '335005047323',
-    projectId: 'v-comm-25582',
-    databaseURL: 'https://v-comm-25582-default-rtdb.firebaseio.com',
-    storageBucket: 'v-comm-25582.firebasestorage.app',
+    apiKey: 'AIzaSyAxwpKUt2HwrHGZOEJWMElMWCxbdkkA3pA',
+    appId: '1:1076369172527:android:c78d21eb0ea442c0803eda',
+    messagingSenderId: '1076369172527',
+    projectId: 'v-connect-eac00',
+    storageBucket: 'v-connect-eac00.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBSsWASV3Iz2ySfvk734f5P3tPp2LFhTs4',
-    appId: '1:335005047323:ios:eaa57c5fa654f6adc176be',
-    messagingSenderId: '335005047323',
-    projectId: 'v-comm-25582',
-    databaseURL: 'https://v-comm-25582-default-rtdb.firebaseio.com',
-    storageBucket: 'v-comm-25582.firebasestorage.app',
+    apiKey: 'AIzaSyCUkWEJTiuJklJmdOdNAVE_NCDDNSi_ekM',
+    appId: '1:1076369172527:ios:8ff4e621d82c799e803eda',
+    messagingSenderId: '1076369172527',
+    projectId: 'v-connect-eac00',
+    storageBucket: 'v-connect-eac00.firebasestorage.app',
     iosBundleId: 'com.example.vComm',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBSsWASV3Iz2ySfvk734f5P3tPp2LFhTs4',
-    appId: '1:335005047323:ios:eaa57c5fa654f6adc176be',
-    messagingSenderId: '335005047323',
-    projectId: 'v-comm-25582',
-    databaseURL: 'https://v-comm-25582-default-rtdb.firebaseio.com',
-    storageBucket: 'v-comm-25582.firebasestorage.app',
+    apiKey: 'AIzaSyCUkWEJTiuJklJmdOdNAVE_NCDDNSi_ekM',
+    appId: '1:1076369172527:ios:8ff4e621d82c799e803eda',
+    messagingSenderId: '1076369172527',
+    projectId: 'v-connect-eac00',
+    storageBucket: 'v-connect-eac00.firebasestorage.app',
     iosBundleId: 'com.example.vComm',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAZyO5umKV4IwAlFexqLBOqkJz_W_MHt9M',
-    appId: '1:335005047323:web:8318c2836ca46a4cc176be',
-    messagingSenderId: '335005047323',
-    projectId: 'v-comm-25582',
-    authDomain: 'v-comm-25582.firebaseapp.com',
-    databaseURL: 'https://v-comm-25582-default-rtdb.firebaseio.com',
-    storageBucket: 'v-comm-25582.firebasestorage.app',
-    measurementId: 'G-BW4GJY6R4D',
+    apiKey: 'AIzaSyDj6RbT7ibDvEV_ZjeS5iO9_0e0USgmXFg',
+    appId: '1:1076369172527:web:76d5364a2b1b9f8b803eda',
+    messagingSenderId: '1076369172527',
+    projectId: 'v-connect-eac00',
+    authDomain: 'v-connect-eac00.firebaseapp.com',
+    storageBucket: 'v-connect-eac00.firebasestorage.app',
+    measurementId: 'G-6Y3SCDEKQD',
   );
-
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:v_comm/HomePage/homepage.dart'; // Ensure this path is correct
+import 'package:v_connect/HomePage/homepage.dart'; // Ensure this path is correct
 
 class SignInButton extends StatelessWidget {
   final TextEditingController usernameController;

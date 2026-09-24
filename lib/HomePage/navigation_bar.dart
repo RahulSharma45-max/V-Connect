@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:v_comm/Calendar/calendar.dart';
-import 'package:v_comm/Profile/profile.dart';
-import 'package:v_comm/Search/search_page.dart';
-import 'package:v_comm/Chat/chat_home_page.dart';
+import 'package:v_connect/Calendar/calendar.dart';
+import 'package:v_connect/Profile/profile.dart';
+import 'package:v_connect/Search/search_page.dart';
+import 'package:v_connect/Chat/chat_home_page.dart';
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({super.key});

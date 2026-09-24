@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:v_comm/LoginPage/forgot_password.dart';
-import 'package:v_comm/LoginPage/username.dart';
-import 'package:v_comm/LoginPage/password.dart';
-import 'package:v_comm/LoginPage/sign_in.dart';
+import 'package:v_connect/LoginPage/forgot_password.dart';
+import 'package:v_connect/LoginPage/username.dart';
+import 'package:v_connect/LoginPage/password.dart';
+import 'package:v_connect/LoginPage/sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 60),
                   Text(
-                    'V-COMM',
+                    'V-CONNECT',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       color: Colors.white,

@@ -144,7 +144,7 @@ class ProfilePage extends StatelessWidget {
                     icon: Icons.help_outline,
                     title: "Support",
                     onTap: () => _launchUrl(
-                      'mailto:support@vcomm.com?subject=Support Request',
+                      'mailto:support@vconnect.com?subject=Support Request',
                     ),
                   ),
 

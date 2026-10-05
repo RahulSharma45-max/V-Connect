@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:v_connect/Calendar/calendar.dart';
 import 'package:v_connect/Profile/profile.dart';
 import 'package:v_connect/Search/search_page.dart';
-import 'package:v_connect/Chat/chat_home_page.dart';
+import 'package:v_connect/Communities/communities_home_page.dart';
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({super.key});
@@ -33,7 +33,7 @@ class _NavigationBarState extends State<NavigationBar> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ChatHomePage()),
+        MaterialPageRoute(builder: (context) => const CommunitiesHomePage()),
       );
     }
 

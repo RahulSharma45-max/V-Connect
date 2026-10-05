@@ -10,24 +10,79 @@ class UserDetailsPopup extends StatelessWidget {
 
   const UserDetailsPopup({super.key, required this.userData});
 
-  void _navigateToChat(BuildContext context) {
+  Future<void> _navigateToChat(BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
-    final String uid = userData['uid'] ?? userData['id'];
+    final String? rawOtherId =
+        (userData['id'] != null && userData['id'].toString().isNotEmpty)
+            ? userData['id'].toString()
+            : ((userData['uid'] != null && userData['uid'].toString().isNotEmpty)
+                ? userData['uid'].toString()
+                : null);
 
-    List<String> ids = [currentUser.uid, uid];
-    ids.sort();
+    if (rawOtherId == null || rawOtherId.isEmpty || rawOtherId == currentUser.uid) {
+      debugPrint('[UserDetailsPopup] Invalid recipient ID: $rawOtherId');
+      return;
+    }
+
+    final String otherUserId = rawOtherId;
+    final Map<String, dynamic> preparedOtherUser =
+        Map<String, dynamic>.from(userData);
+    preparedOtherUser['id'] = otherUserId;
+    preparedOtherUser['uid'] = otherUserId;
+
+    List<String> ids = [currentUser.uid, otherUserId]..sort();
     String chatRoomId = ids.join('_');
 
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ChatPage(chatRoomId: chatRoomId, otherUser: userData),
-      ),
-    );
+    try {
+      final chatRef =
+          FirebaseFirestore.instance.collection('chats').doc(chatRoomId);
+      final doc = await chatRef.get();
+      if (doc.exists) {
+        await chatRef.update({'unreadCount.${currentUser.uid}': 0});
+      } else {
+        await chatRef.set({
+          'participants': [currentUser.uid, otherUserId],
+          'isGroup': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastMessage': 'Chat started',
+          'lastMessageTimestamp': FieldValue.serverTimestamp(),
+          'lastMessageSenderId': currentUser.uid,
+          'unreadCount': {
+            currentUser.uid: 0,
+            otherUserId: 0,
+          },
+          'archivedBy': {
+            currentUser.uid: false,
+            otherUserId: false,
+          },
+        });
+      }
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatPage(
+              chatRoomId: chatRoomId,
+              otherUser: preparedOtherUser,
+            ),
+          ),
+        );
+      }
+    } catch (e, st) {
+      debugPrint('[UserDetailsPopup] Error opening chat: $e\n$st');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open chat: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   String? _convertGDriveLink(String? url) {

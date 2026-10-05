@@ -15,7 +15,7 @@ class ChatHomePage extends StatefulWidget {
 }
 
 class _ChatHomePageState extends State<ChatHomePage> {
-  final User? currentUser = FirebaseAuth.instance.currentUser;
+  User? currentUser;
   List<Map<String, dynamic>> _allUsers = [];
   bool _isLoading = true;
   String _filterType = 'all';
@@ -25,6 +25,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
   @override
   void initState() {
     super.initState();
+    // Read currentUser inside initState so we get the fully-restored auth state.
+    currentUser = FirebaseAuth.instance.currentUser;
+    debugPrint('[ChatHomePage] initState — currentUser uid: ${currentUser?.uid ?? "NULL"}');
     _fetchAllUsers();
   }
 
@@ -66,54 +69,125 @@ class _ChatHomePageState extends State<ChatHomePage> {
     );
   }
 
-  void _navigateToChat(Map<String, dynamic> otherUser) {
-    if (currentUser == null) return;
+  Future<void> _navigateToChat(Map<String, dynamic> otherUser) async {
+    final authUser = currentUser ?? FirebaseAuth.instance.currentUser;
+    if (authUser == null) {
+      debugPrint('[ChatHomePage] _navigateToChat: currentUser is NULL');
+      if (mounted) {
+        _showSnackBar('You must be logged in to chat.', isError: true);
+      }
+      return;
+    }
+    currentUser = authUser;
 
-    List<String> ids = [currentUser!.uid, otherUser['id']]..sort();
-    final chatRoomId = ids.join('_');
-    final chatRef = FirebaseFirestore.instance
-        .collection('chats')
-        .doc(chatRoomId);
+    // Robust ID extraction: prefer 'id', fallback to 'uid'
+    final String? rawOtherId =
+        (otherUser['id'] != null && otherUser['id'].toString().isNotEmpty)
+            ? otherUser['id'].toString()
+            : ((otherUser['uid'] != null && otherUser['uid'].toString().isNotEmpty)
+                ? otherUser['uid'].toString()
+                : null);
 
-    chatRef
-        .get()
-        .then((doc) {
-          if (doc.exists) {
-            // When a chat is opened, clear the unread count.
-            chatRef.update({'unreadCount.${currentUser!.uid}': 0});
-          } else {
-            // When creating a new chat, initialize all necessary fields.
-            chatRef.set({
-              'participants': [currentUser!.uid, otherUser['id']],
-              'isGroup': false,
-              'createdAt': FieldValue.serverTimestamp(),
-              'lastMessage': 'Chat started',
-              'lastMessageTimestamp': FieldValue.serverTimestamp(),
-              'lastMessageSenderId': currentUser!.uid,
-              'unreadCount': {currentUser!.uid: 0, otherUser['id']: 0},
-              'archivedBy': {currentUser!.uid: false, otherUser['id']: false},
-            });
-          }
-        })
-        .then((_) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(
-                chatRoomId: chatRoomId,
-                otherUser: otherUser,
-                isGroup: false,
-              ),
-            ),
-          ).then((_) {
-            if (_isSearching) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-            }
-          });
+    debugPrint('[ChatHomePage] _navigateToChat called with input: $otherUser');
+    debugPrint('[ChatHomePage] Extracted rawOtherId: $rawOtherId');
+
+    if (rawOtherId == null || rawOtherId.isEmpty) {
+      debugPrint('[ChatHomePage] _navigateToChat ABORT: invalid recipient user ID');
+      if (mounted) {
+        _showSnackBar('Cannot start chat: Invalid user ID', isError: true);
+      }
+      return;
+    }
+
+    if (rawOtherId == authUser.uid) {
+      debugPrint('[ChatHomePage] _navigateToChat ABORT: recipient is current user (${authUser.uid})');
+      if (mounted) {
+        _showSnackBar('Cannot start a chat with yourself', isError: true);
+      }
+      return;
+    }
+
+    final String otherUserId = rawOtherId;
+
+    // Ensure preparedOtherUser map contains both 'id' and 'uid' for ChatPage compatibility
+    final Map<String, dynamic> preparedOtherUser = Map<String, dynamic>.from(otherUser);
+    preparedOtherUser['id'] = otherUserId;
+    preparedOtherUser['uid'] = otherUserId;
+
+    // Generate DM chatRoomId deterministically
+    List<String> ids = [authUser.uid, otherUserId]..sort();
+    final String chatRoomId = ids.join('_');
+
+    debugPrint('[ChatHomePage] _navigateToChat — currentUser: ${authUser.uid}, otherUser: $otherUserId, chatRoomId: $chatRoomId');
+
+    try {
+      final chatRef = FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatRoomId);
+
+      debugPrint('[ChatHomePage] Checking Firestore doc: chats/$chatRoomId');
+      final doc = await chatRef.get();
+
+      if (doc.exists) {
+        debugPrint('[ChatHomePage] Existing chat doc found for $chatRoomId. Resetting unread count.');
+        await chatRef.update({
+          'unreadCount.${authUser.uid}': 0,
         });
+      } else {
+        debugPrint('[ChatHomePage] Creating new chat doc at chats/$chatRoomId');
+        await chatRef.set({
+          'participants': [authUser.uid, otherUserId],
+          'isGroup': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastMessage': 'Chat started',
+          'lastMessageTimestamp': FieldValue.serverTimestamp(),
+          'lastMessageSenderId': authUser.uid,
+          'unreadCount': {
+            authUser.uid: 0,
+            otherUserId: 0,
+          },
+          'archivedBy': {
+            authUser.uid: false,
+            otherUserId: false,
+          },
+        });
+        debugPrint('[ChatHomePage] New chat doc created successfully for $chatRoomId');
+      }
+
+      if (!mounted) {
+        debugPrint('[ChatHomePage] Widget unmounted before Navigator.push');
+        return;
+      }
+
+      debugPrint('[ChatHomePage] Pushing ChatPage for $chatRoomId');
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatPage(
+            chatRoomId: chatRoomId,
+            otherUser: preparedOtherUser,
+            isGroup: false,
+          ),
+        ),
+      );
+
+      debugPrint('[ChatHomePage] Returned from ChatPage for $chatRoomId');
+
+      if (mounted && _isSearching) {
+        setState(() {
+          _isSearching = false;
+          _searchController.clear();
+        });
+      }
+    } catch (e, st) {
+      debugPrint('[ChatHomePage] *** EXCEPTION in _navigateToChat ***');
+      debugPrint('[ChatHomePage] Exception: $e');
+      debugPrint('[ChatHomePage] StackTrace: $st');
+
+      if (mounted) {
+        _showSnackBar('Could not open chat: ${e.toString()}', isError: true);
+      }
+    }
   }
 
   Future<void> _unarchiveChat(String chatId) async {
@@ -497,49 +571,74 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: CheckboxListTile(
-                                    value: isSelected,
-                                    onChanged: (v) => setDialogState(() {
-                                      if (v == true) {
-                                        selectedMembers.add(user['id']);
-                                      } else {
-                                        selectedMembers.remove(user['id']);
-                                      }
-                                    }),
-                                    title: Text(
-                                      user['name'] ?? 'No Name',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: CheckboxListTile(
+                                      value: isSelected,
+                                      onChanged: (v) => setDialogState(() {
+                                        if (v == true) {
+                                          selectedMembers.add(user['id']);
+                                        } else {
+                                          selectedMembers.remove(user['id']);
+                                        }
+                                      }),
+                                      title: Text(
+                                        user['name'] ?? 'No Name',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    ),
-                                    subtitle: Text(
-                                      user['email'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white.withOpacity(0.6),
-                                        fontSize: 12,
+                                      subtitle: Text(
+                                        user['email'] ?? '',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white.withOpacity(0.6),
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                    secondary: CircleAvatar(
-                                      backgroundColor: Colors.white.withOpacity(
-                                        0.2,
+                                      secondary: CircleAvatar(
+                                        backgroundColor:
+                                            Colors.white.withOpacity(0.2),
+                                        child: ClipOval(
+                                          child: user['photoUrl'] is String &&
+                                                  (user['photoUrl'] as String)
+                                                      .isNotEmpty
+                                              ? Image.network(
+                                                  user['photoUrl'],
+                                                  width: 48,
+                                                  height: 48,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return Center(
+                                                      child: Text(
+                                                        (user['name'] ??
+                                                                'U')[0]
+                                                            .toUpperCase(),
+                                                        style: GoogleFonts.inter(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                              : Text(
+                                                  (user['name'] ?? 'U')[0]
+                                                      .toUpperCase(),
+                                                  style: GoogleFonts.inter(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                        ),
                                       ),
-                                      backgroundImage: user['photoUrl'] != null
-                                          ? NetworkImage(user['photoUrl'])
-                                          : null,
-                                      child: user['photoUrl'] == null
-                                          ? Text(
-                                              (user['name'] ?? 'U')[0]
-                                                  .toUpperCase(),
-                                              style: GoogleFonts.inter(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )
-                                          : null,
+                                      activeColor: Colors.white,
+                                      checkColor: Colors.black,
                                     ),
-                                    activeColor: Colors.white,
-                                    checkColor: Colors.black,
                                   ),
                                 );
                               },
@@ -675,6 +774,15 @@ class _ChatHomePageState extends State<ChatHomePage> {
         }
 
         if (snapshot.hasError) {
+          final err = snapshot.error;
+          final st = snapshot.stackTrace;
+          debugPrint('[ChatHomePage] *** Firestore error ***');
+          debugPrint('[ChatHomePage] currentUser uid: ${currentUser?.uid ?? "NULL"}');
+          debugPrint('[ChatHomePage] error type: ${err.runtimeType}');
+          debugPrint('[ChatHomePage] error: $err');
+          if (st != null) debugPrint('[ChatHomePage] stackTrace: $st');
+          // Show a concise message to user but full detail in console.
+          final errStr = err?.toString() ?? 'Unknown error';
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -689,6 +797,17 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 Text(
                   'Please check your connection',
                   style: GoogleFonts.inter(color: Colors.white54, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    errStr,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(color: Colors.red.shade300, fontSize: 11),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -840,22 +959,44 @@ class _ChatHomePageState extends State<ChatHomePage> {
             borderRadius: BorderRadius.circular(10),
             color: Colors.white.withOpacity(0.05),
           ),
+          child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          clipBehavior: Clip.antiAlias,
           child: ListTile(
             onTap: () => _navigateToChat(user),
             leading: CircleAvatar(
               backgroundColor: Colors.white.withOpacity(0.2),
-              backgroundImage: user['photoUrl'] != null
-                  ? NetworkImage(user['photoUrl'])
-                  : null,
-              child: user['photoUrl'] == null
-                  ? Text(
-                      (user['name'] ?? 'U')[0].toUpperCase(),
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+              child: ClipOval(
+                child: user['photoUrl'] is String &&
+                        (user['photoUrl'] as String).isNotEmpty
+                    ? Image.network(
+                        user['photoUrl'] as String,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Text(
+                              (user['name'] ?? 'U')[0].toUpperCase(),
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text(
+                          (user['name'] ?? 'U')[0].toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    )
-                  : null,
+              ),
             ),
             title: Text(
               user['name'] ?? 'No Name',
@@ -877,6 +1018,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
               color: Colors.white.withOpacity(0.5),
             ),
           ),
+        ),
+
         );
       },
     );
@@ -1317,7 +1460,7 @@ class _ChatListItem extends StatelessWidget {
               ),
           ],
         ),
-        onTap: () {
+        onTap: () async {
           if (isGroup) {
             onGroupTap(
               chatDoc.id,
@@ -1325,15 +1468,20 @@ class _ChatListItem extends StatelessWidget {
               chatData['participants'],
             );
           } else {
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(otherUserId)
-                .get()
-                .then((doc) {
-                  if (doc.exists) {
-                    onUserTap({'id': otherUserId, ...doc.data()!});
-                  }
-                });
+            try {
+              final doc = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(otherUserId)
+                  .get();
+              if (doc.exists && doc.data() != null) {
+                onUserTap({'id': otherUserId, ...doc.data()!});
+              } else {
+                onUserTap({'id': otherUserId, 'name': 'User'});
+              }
+            } catch (e) {
+              debugPrint('[ChatListItem] Error fetching user profile for $otherUserId: $e');
+              onUserTap({'id': otherUserId, 'name': 'User'});
+            }
           }
         },
       ),
@@ -1377,18 +1525,39 @@ class _ChatListItem extends StatelessWidget {
           return CircleAvatar(
             radius: 28,
             backgroundColor: Colors.white.withOpacity(0.2),
-            backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-            child: photoUrl == null
-                ? Text(
-                    name[0].toUpperCase(),
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.white,
+            child: ClipOval(
+              child: photoUrl != null && (photoUrl as String).isNotEmpty
+                  ? Image.network(
+                      photoUrl.toString(),
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(
+                          child: Text(
+                            name[0].toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        name[0].toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  )
-                : null,
+            ),
           );
+
         },
       );
     }

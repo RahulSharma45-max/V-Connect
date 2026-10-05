@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── Users collection ──────────────────────────────────────────────────────
+    // Any authenticated user can read other users' profiles (needed for search /
+    // name display in chat). Only the owner can write their own profile.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ── Chats collection ──────────────────────────────────────────────────────
+    match /chats/{chatId} {
+      // Allow reading existing chats if the user is a participant,
+      // or allow checking if a chat document exists (resource == null).
+      allow get: if isSignedIn() && (resource == null || request.auth.uid in resource.data.participants);
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      // Allow creating a new chat; the creator must include themselves in participants.
+      allow create: if isSignedIn() &&
+                       request.resource.data.participants is list &&
+                       request.auth.uid in request.resource.data.participants;
+
+      // Allow updating a chat if the user is currently a participant and remains a participant.
+      allow update: if isSignedIn() &&
+                       request.auth.uid in resource.data.participants &&
+                       request.auth.uid in request.resource.data.participants;
+
+      // Allow deleting a chat if participant (and for groups, creator only)
+      allow delete: if isSignedIn() &&
+                       request.auth.uid in resource.data.participants &&
+                       (resource.data.isGroup != true || resource.data.createdBy == request.auth.uid);
+
+      // ── Messages sub-collection ───────────────────────────────────────────
+      match /messages/{messageId} {
+        function parentChat() {
+          return get(/databases/$(database)/documents/chats/$(chatId));
+        }
+
+        function isParentParticipant() {
+          return isSignedIn() &&
+                 parentChat().data != null &&
+                 request.auth.uid in parentChat().data.participants;
+        }
+
+        // Only participants of the parent chat can read messages.
+        allow read: if isParentParticipant();
+
+        // Only participants can create messages, and senderId must match auth user.
+        allow create: if isParentParticipant() &&
+                          request.resource.data.senderId == request.auth.uid;
+
+        // Participants can update (reactions, pinned, etc.) or delete messages.
+        allow update, delete: if isParentParticipant();
+      }
+    }
+  }
+}

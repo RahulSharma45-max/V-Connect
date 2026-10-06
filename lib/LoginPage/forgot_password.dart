@@ -1,34 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class ForgotPassword extends StatelessWidget {
   final TextEditingController usernameController;
   const ForgotPassword(this.usernameController, {super.key});
-
-  void _showFeedbackSnackBar(
-    BuildContext context,
-    String message, {
-    bool isError = true,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.inter(color: Colors.white)),
-        backgroundColor: isError
-            ? Colors.redAccent.shade200.withOpacity(0.9)
-            : Colors.green.withOpacity(0.9),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () async {
         if (usernameController.text.trim().isEmpty) {
-          _showFeedbackSnackBar(
+          showVSnackBar(
             context,
             "Please enter your email to reset your password.",
+            isError: true,
           );
           return;
         }
@@ -36,23 +24,20 @@ class ForgotPassword extends StatelessWidget {
           await FirebaseAuth.instance.sendPasswordResetEmail(
             email: usernameController.text.trim(),
           );
-          _showFeedbackSnackBar(
+          showVSnackBar(
             context,
             "Password reset email sent. Check your inbox.",
-            isError: false,
           );
         } catch (e) {
-          _showFeedbackSnackBar(
+          showVSnackBar(
             context,
             "Failed to send reset email. Please try again.",
+            isError: true,
           );
         }
       },
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white.withOpacity(0.7),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      ),
-      child: Text('Forgot Password?', style: GoogleFonts.inter()),
+      style: TextButton.styleFrom(foregroundColor: AppColors.maroon),
+      child: Text('Forgot Password?', style: GoogleFonts.inter(fontSize: 13)),
     );
   }
 }

@@ -1,30 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:v_connect/LoginPage/login_page.dart';
 import 'package:v_connect/Profile/edit_profile.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
+
 // Note: You will need to create this page if it doesn't exist
 // import 'package:v_connect/Profile/notification_settings_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
-
-  // --- (Helper functions remain the same) ---
-  void _showFeedbackSnackBar(
-    BuildContext context,
-    String message, {
-    bool isError = true,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.inter(color: Colors.white)),
-        backgroundColor: isError
-            ? Colors.redAccent.shade200.withOpacity(0.9)
-            : Colors.green.withOpacity(0.9),
-      ),
-    );
-  }
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
@@ -40,7 +28,7 @@ class ProfilePage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Colors.black,
+            backgroundColor: AppColors.background,
             body: Center(child: CircularProgressIndicator()),
           );
         }
@@ -52,177 +40,132 @@ class ProfilePage extends StatelessWidget {
         final userEmail = user.email ?? "no-email@example.com";
 
         return Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: const Color(0xFF1A1A1A),
-            elevation: 0,
-            shape: Border(
-              bottom: BorderSide(color: Colors.white.withOpacity(0.2)),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              "Profile",
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                color: Colors.white,
-              ),
-            ),
-            centerTitle: true,
-          ),
-          body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.black, Color(0xFF111111), Colors.black],
-              ),
-            ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  _profileHeaderCard(context, user: user, userEmail: userEmail),
-
-                  const SizedBox(height: 30),
-                  _buildSectionHeader("Account"),
-                  _settingsTile(
-                    context: context,
-                    icon: Icons.edit_outlined,
-                    title: "Edit Profile",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EditProfilePage(),
-                        ),
-                      );
-                    },
-                  ),
-                  _settingsTile(
-                    context: context,
-                    icon: Icons.lock_outline,
-                    title: "Change Password",
-                    onTap: () async {
-                      try {
-                        await FirebaseAuth.instance.sendPasswordResetEmail(
-                          email: userEmail,
-                        );
-                        _showFeedbackSnackBar(
+          backgroundColor: AppColors.background,
+          appBar: const VAppBar(title: "Profile"),
+          body: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            children: [
+              _profileHeaderCard(context, user: user, userEmail: userEmail),
+              VSectionCard(
+                title: "Account",
+                icon: Icons.manage_accounts_outlined,
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    _settingsTile(
+                      icon: Icons.edit_outlined,
+                      title: "Edit Profile",
+                      onTap: () {
+                        Navigator.push(
                           context,
-                          "Password reset email sent to $userEmail.",
-                          isError: false,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfilePage(),
+                          ),
                         );
-                      } catch (e) {
-                        _showFeedbackSnackBar(
-                          context,
-                          "Failed to send email. Please try again.",
-                        );
-                      }
-                    },
-                  ),
-                  // _settingsTile(
-                  //   context: context,
-                  //   icon: Icons.notifications_outlined,
-                  //   title: "Notification Settings",
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
-                  //     );
-                  //   },
-                  // ),
-                  const SizedBox(height: 30),
-                  _buildSectionHeader("Support & Legal"),
-                  _settingsTile(
-                    context: context,
-                    icon: Icons.help_outline,
-                    title: "Support",
-                    onTap: () => _launchUrl(
-                      'mailto:support@vconnect.com?subject=Support Request',
+                      },
                     ),
-                  ),
-
-                  // --- MODIFIED LOGOUT BUTTON SECTION ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 30.0),
-                    child: Center(
-                      // Center the button horizontally
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.withOpacity(0.15),
-                          foregroundColor: Colors.red.shade300,
-                          overlayColor: Colors.red.withOpacity(0.1),
-                          // Add padding to give the content breathing room
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        onPressed: () async {
-                          await FirebaseAuth.instance.signOut();
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                            (Route<dynamic> route) => false,
+                    const Divider(height: 1),
+                    _settingsTile(
+                      icon: Icons.lock_outline,
+                      title: "Change Password",
+                      onTap: () async {
+                        try {
+                          await FirebaseAuth.instance.sendPasswordResetEmail(
+                            email: userEmail,
                           );
-                        },
-                        child: Row(
-                          mainAxisSize:
-                              MainAxisSize.min, // Shrink Row to fit content
-                          children: [
-                            const Icon(Icons.logout, size: 20),
-                            const SizedBox(width: 10),
-                            Text(
-                              "Logout",
-                              style: GoogleFonts.inter(
-                                color: Colors.red.shade300,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          showVSnackBar(
+                            context,
+                            "Password reset email sent to $userEmail.",
+                          );
+                        } catch (e) {
+                          showVSnackBar(
+                            context,
+                            "Failed to send email. Please try again.",
+                            isError: true,
+                          );
+                        }
+                      },
                     ),
-                  ),
-                ],
+                    // _settingsTile(
+                    //   icon: Icons.notifications_outlined,
+                    //   title: "Notification Settings",
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
+                    //     );
+                    //   },
+                    // ),
+                  ],
+                ),
               ),
-            ),
+              VSectionCard(
+                title: "Support & Legal",
+                icon: Icons.support_agent_outlined,
+                padding: EdgeInsets.zero,
+                child: _settingsTile(
+                  icon: Icons.help_outline,
+                  title: "Support",
+                  onTap: () => _launchUrl(
+                    'mailto:support@vconnect.com?subject=Support Request',
+                  ),
+                ),
+              ),
+
+              // --- LOGOUT BUTTON ---
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    side: const BorderSide(color: AppColors.danger),
+                    backgroundColor: AppColors.surface,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.logout, size: 20),
+                  label: Text(
+                    "Logout",
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  // --- WIDGETS WITH RIPPLE EFFECTS ---
-
   Widget _profileHeaderCard(
     BuildContext context, {
     required User user,
     required String userEmail,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Material(
-          color: Colors.transparent,
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data() ?? const <String, dynamic>{};
+        final name = data['name'] ?? user.displayName ?? "User Name";
+        final dept = data['dept'] as String?;
+        final customId = data['customId'] as String?;
+        final photoUrl = data['photoUrl'] as String? ?? user.photoURL;
+
+        return VSectionCard(
+          accent: AppColors.primary,
           child: InkWell(
-            splashColor: Colors.white.withOpacity(0.1),
-            highlightColor: Colors.white.withOpacity(0.05),
             onTap: () {
               Navigator.push(
                 context,
@@ -231,125 +174,76 @@ class ProfilePage extends StatelessWidget {
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.white.withOpacity(0.1),
-                    backgroundImage: user.photoURL != null
-                        ? NetworkImage(user.photoURL!)
-                        : null,
-                    child: user.photoURL == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.white54,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.displayName ?? "User Name",
-                          style: GoogleFonts.inter(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                VAvatar(name: name, photoUrl: photoUrl, radius: 34),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
                         ),
-                        const SizedBox(height: 6),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (dept != null && dept.isNotEmpty) ...[
+                        const SizedBox(height: 2),
                         Text(
-                          userEmail,
+                          dept,
                           style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 14,
+                            color: AppColors.maroon,
+                            fontWeight: FontWeight.w500,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        userEmail,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (customId != null && customId.isNotEmpty)
+                        Text(
+                          'ID: $customId',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+              ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, bottom: 16),
-        child: Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white.withOpacity(0.8),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _settingsTile({
-    required BuildContext context,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 15),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            splashColor: Colors.white.withOpacity(0.1),
-            highlightColor: Colors.white.withOpacity(0.05),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 12.0,
-              ),
-              child: Row(
-                children: [
-                  Icon(icon, color: Colors.white.withOpacity(0.8)),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Colors.white.withOpacity(0.5),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
     );
   }
 }

@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:v_connect/Search/user_details_popup.dart'; // Verify path
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -153,86 +155,50 @@ class _SearchPageState extends State<SearchPage> {
     final bool hasSearchQuery = _searchController.text.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Color(0xFF111111), Colors.black],
-          ),
-        ),
-        // MODIFICATION: SafeArea ensures the UI avoids notches and system bars.
-        child: SafeArea(
-          child: Column(
-            children: [
-              // MODIFICATION: Combined header with back button and search bar.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: "Search...",
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.white.withOpacity(0.7),
-                            ),
-                            suffixIcon: hasSearchQuery
-                                ? IconButton(
-                                    icon: const Icon(
-                                      Icons.close,
-                                      color: Colors.white70,
-                                    ),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      FocusScope.of(context).unfocus();
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+      backgroundColor: AppColors.background,
+      appBar: VAppBar(
+        title: 'Search Faculty',
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: TextField(
+              controller: _searchController,
+              style: GoogleFonts.inter(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+              ),
+              decoration: InputDecoration(
+                hintText: "Search by name, department or ID",
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: hasSearchQuery
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _searchController.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : hasSearchQuery
-                    ? _buildSearchResults()
-                    : _buildSearchHistory(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : hasSearchQuery
+          ? _buildSearchResults()
+          : _buildSearchHistory(),
     );
   }
 
@@ -241,23 +207,23 @@ class _SearchPageState extends State<SearchPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 "Search Results",
                 style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.maroon,
                 ),
               ),
               Text(
                 "${_searchResults.length} found",
                 style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                  color: AppColors.textMuted,
                 ),
               ),
             ],
@@ -265,20 +231,18 @@ class _SearchPageState extends State<SearchPage> {
         ),
         Expanded(
           child: _searchResults.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Text(
-                    "No users found.",
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 16,
-                    ),
+              ? const Align(
+                  alignment: Alignment.topCenter,
+                  child: VEmptyState(
+                    icon: Icons.person_off_outlined,
+                    title: "No users found.",
+                    subtitle: 'Try a different name, department or ID.',
                   ),
                 )
               : RefreshIndicator(
                   onRefresh: _fetchAllUsers,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) =>
                         _buildUserListTile(_searchResults[index]),
@@ -290,173 +254,148 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
+      padding: const EdgeInsets.only(top: 16),
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Recent Searches",
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (_recentSearchQueries.isEmpty)
-                      Text(
-                        "Your search history is empty.",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.6),
+        VSectionCard(
+          title: "Recent Searches",
+          icon: Icons.history,
+          trailing: _recentSearchQueries.isEmpty
+              ? null
+              : VHeaderLink(
+                  label: 'Clear',
+                  color: AppColors.danger,
+                  onTap: _clearSearchHistory,
+                ),
+          child: _recentSearchQueries.isEmpty
+              ? const VEmptyState(
+                  icon: Icons.manage_search,
+                  title: "Your search history is empty.",
+                  subtitle: 'Faculty you look up will appear here.',
+                )
+              : Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: _recentSearchQueries.map((query) {
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        final tappedUser = _allUsers.firstWhere(
+                          (user) => user['id'] == query['id'],
+                          orElse: () => <String, dynamic>{},
+                        );
+                        if (tappedUser.isNotEmpty) {
+                          _showUserDetailsPopup(tappedUser);
+                        } else {
+                          showVSnackBar(
+                            context,
+                            "This user could not be found.",
+                            isError: true,
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.35),
+                          ),
                         ),
-                      )
-                    else
-                      Wrap(
-                        spacing: 12.0,
-                        runSpacing: 12.0,
-                        children: _recentSearchQueries.map((query) {
-                          return GestureDetector(
-                            onTap: () {
-                              final tappedUser = _allUsers.firstWhere(
-                                (user) => user['id'] == query['id'],
-                                orElse: () => <String, dynamic>{},
-                              );
-                              if (tappedUser.isNotEmpty) {
-                                _showUserDetailsPopup(tappedUser);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "This user could not be found.",
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(25),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    query['name'] ?? 'Unknown',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  GestureDetector(
-                                    onTap: () => _removeSearchQuery(query),
-                                    child: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.history,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              query['name'] ?? 'Unknown',
+                              style: GoogleFonts.inter(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
                               ),
                             ),
-                          );
-                        }).toList(),
+                            const SizedBox(width: 4),
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _removeSearchQuery(query),
+                              child: const Padding(
+                                padding: EdgeInsets.all(2),
+                                child: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                  ],
+                    );
+                  }).toList(),
                 ),
-              ),
-            ),
-          ),
         ),
-        if (_recentSearchQueries.isNotEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextButton(
-                onPressed: _clearSearchHistory,
-                child: Text(
-                  "Clear search history",
-                  style: GoogleFonts.inter(
-                    color: Colors.red.shade300,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
 
   Widget _buildUserListTile(Map<String, dynamic> user) {
-    return Card(
-      color: Colors.white.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        splashColor: Colors.white.withOpacity(0.1),
-        onTap: () => _showUserDetailsPopup(user),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.white.withOpacity(0.1),
-                backgroundImage: user['photoUrl'] != null
-                    ? NetworkImage(user['photoUrl'])
-                    : null,
-                child: user['photoUrl'] == null
-                    ? const Icon(Icons.person, color: Colors.white54)
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user['name'] ?? 'No Name',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "${user['dept'] ?? 'N/A'} • ID: ${user['customId'] ?? 'N/A'}",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
+    final bool isPresent = user['isPresent'] == true;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(4),
+        border: const Border(
+          left: BorderSide(color: AppColors.primary, width: 3),
+        ),
+        boxShadow: vCardShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showUserDetailsPopup(user),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Row(
+              children: [
+                VAvatar(
+                  name: user['name'] ?? '',
+                  photoUrl: user['photoUrl'],
+                  radius: 24,
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white.withOpacity(0.5),
-                size: 16,
-              ),
-            ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user['name'] ?? 'No Name',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        "${user['dept'] ?? 'N/A'} • ID: ${user['customId'] ?? 'N/A'}",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                VStatusChip(isPresent: isPresent, compact: true),
+              ],
+            ),
           ),
         ),
       ),

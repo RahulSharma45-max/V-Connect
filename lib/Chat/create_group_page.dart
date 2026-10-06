@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:v_connect/Chat/chat_page.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class CreateGroupPage extends StatefulWidget {
   const CreateGroupPage({super.key});
@@ -104,23 +106,12 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: Text(
-          "New Group",
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+      backgroundColor: AppColors.background,
+      appBar: VAppBar(
+        title: "New Group",
         actions: [
           IconButton(
-            icon: const Icon(Icons.check, color: Colors.white),
+            icon: const Icon(Icons.check),
             onPressed: _createGroup,
           ),
         ],
@@ -133,18 +124,10 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: TextField(
                     controller: _groupNameController,
-                    style: GoogleFonts.inter(color: Colors.white),
-                    decoration: InputDecoration(
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
                       labelText: "Group Name",
-                      labelStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
+                      prefixIcon: Icon(Icons.group_outlined),
                     ),
                   ),
                 ),
@@ -155,8 +138,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                     child: Text(
                       "Select Members (${_selectedUsers.length})",
                       style: GoogleFonts.inter(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.maroon,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -172,17 +155,16 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                       return CheckboxListTile(
                         title: Text(
                           user['name'] ?? 'No Name',
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: AppColors.textPrimary),
                         ),
-                        secondary: CircleAvatar(
-                          backgroundImage: user['photoUrl'] != null
-                              ? NetworkImage(user['photoUrl'])
-                              : null,
+                        secondary: VAvatar(
+                          name: user['name'] ?? '',
+                          photoUrl: user['photoUrl'],
                         ),
                         value: isSelected,
                         onChanged: (selected) => _toggleUserSelection(user),
-                        activeColor: Colors.lightBlue.shade300,
-                        checkColor: Colors.black,
+                        activeColor: AppColors.primary,
+                        checkColor: AppColors.onPrimary,
                       );
                     },
                   ),

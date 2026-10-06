@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class NotificationSettingsPage extends StatefulWidget {
   const NotificationSettingsPage({super.key});
@@ -16,69 +18,51 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        elevation: 0,
-        shape: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.2))),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Notifications",
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white, // MODIFICATION: Explicit color
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Color(0xFF111111), Colors.black],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              _switchTile(
-                title: "Push Notifications",
-                subtitle: "Receive updates about your account and activity.",
-                value: pushNotifications,
-                onChanged: (val) => setState(() => pushNotifications = val),
-              ),
-              _switchTile(
-                title: "Email Notifications",
-                subtitle: "Receive marketing and feature update emails.",
-                value: emailNotifications,
-                onChanged: (val) => setState(() => emailNotifications = val),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement logic to save these settings
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    "Save Changes",
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                    ), // MODIFICATION: Explicit color
-                  ),
+      backgroundColor: AppColors.background,
+      appBar: const VAppBar(title: "Notifications"),
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
+          VSectionCard(
+            title: 'Preferences',
+            icon: Icons.notifications_outlined,
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                _switchTile(
+                  title: "Push Notifications",
+                  subtitle: "Receive updates about your account and activity.",
+                  value: pushNotifications,
+                  onChanged: (val) => setState(() => pushNotifications = val),
                 ),
-              ),
-            ],
+                const Divider(height: 1),
+                _switchTile(
+                  title: "Email Notifications",
+                  subtitle: "Receive marketing and feature update emails.",
+                  value: emailNotifications,
+                  onChanged: (val) => setState(() => emailNotifications = val),
+                ),
+              ],
+            ),
           ),
-        ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () {
+                  // TODO: Implement logic to save these settings
+                  Navigator.pop(context);
+                },
+                child: const Text("Save Changes"),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -89,38 +73,24 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: SwitchListTile(
-        activeColor: Colors.white,
-        activeTrackColor: Colors.grey.shade600,
-        inactiveThumbColor: Colors.grey.shade400,
-        inactiveTrackColor: Colors.grey.shade800,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        title: Text(
-          title,
-          style: GoogleFonts.inter(
-            color: Colors.white, // MODIFICATION: Explicit color
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+    return SwitchListTile(
+      activeColor: AppColors.onPrimary,
+      activeTrackColor: AppColors.primary,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          color: AppColors.textPrimary,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
         ),
-        subtitle: Text(
-          subtitle,
-          style: GoogleFonts.inter(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 14,
-          ),
-        ),
-        value: value,
-        onChanged: onChanged,
       ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+      ),
+      value: value,
+      onChanged: onChanged,
     );
   }
 }

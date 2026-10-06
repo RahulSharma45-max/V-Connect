@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:v_connect/HomePage/homepage.dart';
 import 'package:v_connect/LoginPage/login_page.dart';
+import 'package:v_connect/theme/app_theme.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -9,6 +10,7 @@ class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {

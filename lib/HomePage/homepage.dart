@@ -1,11 +1,16 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart' hide NavigationBar;
-import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:v_connect/Calendar/calendar.dart';
+import 'package:v_connect/Chat/chat_home_page.dart';
 import 'package:v_connect/HomePage/navigation_bar.dart';
-import 'package:v_connect/HomePage/profile_card.dart';
+import 'package:v_connect/LoginPage/login_page.dart';
+import 'package:v_connect/Profile/edit_profile.dart';
+import 'package:v_connect/Profile/profile.dart';
+import 'package:v_connect/Search/search_page.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 import 'package:photo_view/photo_view.dart';
 
 class Homepage extends StatefulWidget {
@@ -20,17 +25,13 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   String name = "";
   String dept = "";
   String customId = "";
+  String? photoUrl;
   bool isPresent = false; // true = Present, false = Absent
 
-  bool _selectedToday = false;
-  bool _selectedFuture = false;
-  bool _selectedTime = false;
-
-  bool _showTodayEvents = false;
-  bool _showFutureEvents = false;
-  bool _showTimeTable = false;
-
   String? timetableUrl;
+
+  /// How many upcoming events the dashboard lists before linking to the calendar.
+  static const int _upcomingPreviewCount = 5;
 
   @override
   void initState() {
@@ -83,6 +84,7 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
           name = data?['name'] ?? "";
           dept = data?['dept'] ?? "";
           customId = data?['customId'] ?? "";
+          photoUrl = data?['photoUrl'];
           isPresent = data?['isPresent'] ?? false;
         });
       }
@@ -191,115 +193,69 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
 
     await showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.8),
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1A1A1A),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: BorderSide(color: Colors.white.withOpacity(0.2)),
-          ),
-          title: const Center(
-            child: Text(
-              "Enter Google Drive Link",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 20,
-              ),
-            ),
-          ),
-          content: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: TextField(
-              controller: linkController,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              decoration: InputDecoration(
-                hintText: "Paste Google Drive link here",
-                hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 14,
+          title: Row(
+            children: [
+              const Icon(Icons.link, color: AppColors.primary),
+              const SizedBox(width: 10),
+              Text(
+                "Google Drive Link",
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                border: InputBorder.none,
               ),
-              maxLines: 3,
-            ),
+            ],
           ),
-          actionsAlignment: MainAxisAlignment.center,
+          content: TextField(
+            controller: linkController,
+            style: GoogleFonts.inter(
+              color: AppColors.textPrimary,
+              fontSize: 15,
+            ),
+            decoration: const InputDecoration(
+              hintText: "Paste the shared timetable link here",
+            ),
+            maxLines: 3,
+          ),
           actions: [
-            SizedBox(
-              width: 120,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(0.15),
-                  foregroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    side: BorderSide(color: Colors.red.withOpacity(0.3)),
-                  ),
-                ),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
-                onPressed: () => Navigator.pop(context),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
               ),
+              child: const Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
             ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                ),
-                onPressed: () async {
-                  if (linkController.text.isNotEmpty) {
-                    final convertedUrl = convertGoogleDriveLink(
-                      linkController.text,
+            ElevatedButton(
+              onPressed: () async {
+                if (linkController.text.isNotEmpty) {
+                  final convertedUrl = convertGoogleDriveLink(
+                    linkController.text,
+                  );
+
+                  if (convertedUrl != null) {
+                    await FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(user.uid)
+                        .update({"timetableUrl": convertedUrl});
+
+                    setState(() {
+                      timetableUrl = convertedUrl;
+                    });
+
+                    Navigator.pop(context);
+                  } else {
+                    showVSnackBar(
+                      context,
+                      "Invalid Google Drive link",
+                      isError: true,
                     );
-
-                    if (convertedUrl != null) {
-                      await FirebaseFirestore.instance
-                          .collection("users")
-                          .doc(user.uid)
-                          .update({"timetableUrl": convertedUrl});
-
-                      setState(() {
-                        timetableUrl = convertedUrl;
-                      });
-
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Invalid Google Drive link"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
                   }
-                },
-                child: const Text(
-                  "Save",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+                }
+              },
+              child: const Text("Save"),
             ),
           ],
         );
@@ -331,7 +287,7 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
                   value: event == null
                       ? 0
                       : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
-                  color: Colors.white,
+                  color: AppColors.onPrimary,
                 ),
               ),
             ),
@@ -341,16 +297,16 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
                   ),
-                  child: const Icon(Icons.close, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textPrimary,
+                    size: 22,
+                  ),
                 ),
               ),
             ),
@@ -360,479 +316,582 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
     );
   }
 
+  void _open(Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+  void _onQuickLink(String value) {
+    switch (value) {
+      case 'timetable':
+        uploadTimetable();
+        break;
+      case 'events':
+        _open(const CalendarPage());
+        break;
+      case 'messages':
+        _open(const ChatHomePage());
+        break;
+      case 'edit_profile':
+        _open(const EditProfilePage());
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
+      backgroundColor: AppColors.background,
+      appBar: VAppBar(
+        titleWidget: const VBrandMark(),
+        titleSpacing: 0,
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: 'Quick Links',
+            onSelected: _onQuickLink,
+            offset: const Offset(0, 44),
+            itemBuilder: (context) => [
+              _quickLinkItem('timetable', Icons.table_chart, 'Timetable link'),
+              _quickLinkItem('events', Icons.event, 'Events calendar'),
+              _quickLinkItem('messages', Icons.message_outlined, 'Messages'),
+              _quickLinkItem(
+                'edit_profile',
+                Icons.edit_outlined,
+                'Edit profile',
+              ),
+            ],
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: AppColors.onPrimary.withOpacity(0.5)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 70),
-
-                  /// ✅ PROFILE CARD WITH COMPACT TOGGLE ON RIGHT SIDE
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16),
-
-                        /// Middle - User Info
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                dept,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                customId,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white.withOpacity(0.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        /// ✅ Right Side - Compact Status Toggle Button
-                        GestureDetector(
-                          onTap: toggleStatus,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isPresent
-                                  ? Colors.green.withOpacity(0.2)
-                                  : Colors.red.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: isPresent ? Colors.green : Colors.red,
-                                width: 2,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  isPresent ? Icons.check_circle : Icons.cancel,
-                                  color: isPresent ? Colors.green : Colors.red,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  isPresent ? "PRESENT" : "ABSENT",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Quick Links',
+                    style: GoogleFonts.inter(
+                      color: AppColors.onPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  /// ✅ TOP BUTTONS
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: SizedBox(
-                      height: 50,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _topButton("Current Events", _selectedToday, () {
-                            setState(() {
-                              if (_selectedToday) {
-                                _selectedToday = false;
-                                _showTodayEvents = false;
-                              } else {
-                                _selectedToday = true;
-                                _selectedFuture = false;
-                                _selectedTime = false;
-
-                                _showTodayEvents = true;
-                                _showFutureEvents = false;
-                                _showTimeTable = false;
-                              }
-                            });
-                          }),
-
-                          const SizedBox(width: 10),
-
-                          _topButton("Future Events", _selectedFuture, () {
-                            setState(() {
-                              if (_selectedFuture) {
-                                _selectedFuture = false;
-                                _showFutureEvents = false;
-                              } else {
-                                _selectedFuture = true;
-                                _selectedToday = false;
-                                _selectedTime = false;
-
-                                _showFutureEvents = true;
-                                _showTodayEvents = false;
-                                _showTimeTable = false;
-                              }
-                            });
-                          }),
-
-                          const SizedBox(width: 10),
-
-                          _topButton("Time Table", _selectedTime, () {
-                            setState(() {
-                              if (_selectedTime) {
-                                _selectedTime = false;
-                                _showTimeTable = false;
-                              } else {
-                                _selectedTime = true;
-                                _selectedToday = false;
-                                _selectedFuture = false;
-
-                                _showTimeTable = true;
-                                _showTodayEvents = false;
-                                _showFutureEvents = false;
-                              }
-                            });
-                          }),
-                        ],
-                      ),
-                    ),
+                  const Icon(
+                    Icons.arrow_drop_down,
+                    color: AppColors.onPrimary,
+                    size: 18,
                   ),
-
-                  const SizedBox(height: 15),
-
-                  if (_showTodayEvents)
-                    _eventsListSection(
-                      title: "Current Events",
-                      stream: streamTodayEvents(),
-                    ),
-
-                  if (_showFutureEvents)
-                    _eventsListSection(
-                      title: "Upcoming Events",
-                      stream: streamFutureEvents(),
-                    ),
-
-                  if (_showTimeTable) _timetableSection(),
                 ],
               ),
             ),
           ),
+        ],
+      ),
+      drawer: _buildDrawer(),
+      bottomNavigationBar: const NavigationBar(),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await fetchUserData();
+          await fetchTimetable();
+        },
+        child: ListView(
+          padding: const EdgeInsets.only(top: 20, bottom: 12),
+          children: [
+            _welcomeHeader(),
+            const SizedBox(height: 18),
+            _profileStatusCard(),
+            _moduleGrid(),
+            _eventsListSection(
+              title: "Today's Events",
+              icon: Icons.today,
+              stream: streamTodayEvents(),
+              emptyText: 'Nothing scheduled for today.',
+            ),
+            _eventsListSection(
+              title: "Upcoming Events",
+              icon: Icons.upcoming,
+              stream: streamFutureEvents(),
+              emptyText: 'No upcoming events.',
+              limit: _upcomingPreviewCount,
+            ),
+            _timetableSection(),
+          ],
+        ),
+      ),
+    );
+  }
 
-          NavigationBar(),
-          const SizedBox(height: 20),
+  PopupMenuItem<String> _quickLinkItem(
+    String value,
+    IconData icon,
+    String label,
+  ) {
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Text(label, style: GoogleFonts.inter(color: AppColors.textPrimary)),
         ],
       ),
     );
   }
 
-  /// ✅ BUTTON UI
-  Widget _topButton(String text, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-        decoration: BoxDecoration(
-          color: selected
-              ? Colors.white.withOpacity(0.20)
-              : Colors.white.withOpacity(0.10),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: selected
-                ? Colors.white.withOpacity(0.50)
-                : Colors.white.withOpacity(0.25),
-            width: selected ? 1.3 : 1,
+  Widget _welcomeHeader() {
+    final firstName = name.trim().isEmpty ? '' : name.trim().split(' ').first;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Text(
+            firstName.isEmpty ? 'Welcome to V-Connect' : 'Welcome, $firstName',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: AppColors.primary,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+          const SizedBox(height: 6),
+          Text(
+            'Messages, events, timetables and presence for your campus in one place.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.4,
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  /// ✅ PROFILE CARD WITH PRESENCE TOGGLE
+  Widget _profileStatusCard() {
+    return VSectionCard(
+      title: dept.isEmpty ? 'My Profile' : dept,
+      icon: Icons.account_circle_outlined,
+      accent: AppColors.maroon,
+      child: Row(
+        children: [
+          VAvatar(name: name, photoUrl: photoUrl, radius: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.isEmpty ? '—' : name,
+                  style: GoogleFonts.inter(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  customId.isEmpty ? '' : 'ID: $customId',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              InkWell(
+                onTap: toggleStatus,
+                borderRadius: BorderRadius.circular(20),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: VStatusChip(
+                    key: ValueKey(isPresent),
+                    isPresent: isPresent,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Tap to change',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _moduleGrid() {
+    final tiles = [
+      VModuleTile(
+        label: 'Search',
+        icon: Icons.person_search,
+        color: AppColors.accentBlue,
+        onTap: () => _open(const SearchPage()),
+      ),
+      VModuleTile(
+        label: 'Events',
+        icon: Icons.event_note,
+        color: AppColors.accentGold,
+        onTap: () => _open(const CalendarPage()),
+      ),
+      VModuleTile(
+        label: 'Messages',
+        icon: Icons.forum_outlined,
+        color: AppColors.accentGreen,
+        onTap: () => _open(const ChatHomePage()),
+      ),
+      VModuleTile(
+        label: 'Profile',
+        icon: Icons.manage_accounts_outlined,
+        color: AppColors.accentCyan,
+        onTap: () => _open(const ProfilePage()),
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 2.0,
+        children: tiles,
       ),
     );
   }
 
   /// ✅ Timetable Section
   Widget _timetableSection() {
-    return _wrapContainer(
-      child: Column(
-        children: [
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.table_chart, color: Colors.white, size: 26),
-                SizedBox(width: 10),
-                Text(
-                  "Time Table",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+    return VSectionCard(
+      title: 'Time Table',
+      icon: Icons.table_chart_outlined,
+      trailing: VHeaderLink(
+        label: timetableUrl == null ? 'Add link' : 'Replace',
+        onTap: uploadTimetable,
+      ),
+      child: timetableUrl == null
+          ? Column(
+              children: [
+                const VEmptyState(
+                  icon: Icons.table_chart_outlined,
+                  title: 'No Time Table Uploaded',
+                  subtitle: 'Share it from Google Drive and paste the link.',
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: uploadTimetable,
+                    icon: const Icon(Icons.link),
+                    label: const Text("Add Google Drive Link"),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          timetableUrl == null
-              ? Column(
+            )
+          : GestureDetector(
+              onTap: _showTimetablePopup,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Stack(
+                  alignment: Alignment.bottomRight,
                   children: [
-                    const Text(
-                      "No Time Table Uploaded",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: uploadTimetable,
-                          icon: const Icon(Icons.link),
-                          label: const Text("Add Google Drive Link"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : Column(
-                  children: [
-                    GestureDetector(
-                      onTap: _showTimetablePopup,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Stack(
-                          children: [
-                            Image.network(
-                              timetableUrl!,
-                              height: 200,
-                              fit: BoxFit.contain,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return SizedBox(
-                                      height: 200,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes!
-                                              : null,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                            ),
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.zoom_in,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                ),
+                    Container(
+                      width: double.infinity,
+                      color: AppColors.surfaceAlt,
+                      child: Image.network(
+                        timetableUrl!,
+                        height: 200,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                    : null,
                               ),
                             ),
-                          ],
+                          );
+                        },
+                        errorBuilder: (_, _, _) => const SizedBox(
+                          height: 120,
+                          child: VEmptyState(
+                            icon: Icons.broken_image_outlined,
+                            title: 'Could not load the timetable image',
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: uploadTimetable,
-                          icon: const Icon(Icons.link),
-                          label: const Text("Replace Timetable Link"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                    Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.zoom_in,
+                            color: AppColors.onPrimary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Tap to zoom',
+                            style: GoogleFonts.inter(
+                              color: AppColors.onPrimary,
+                              fontSize: 12,
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-        ],
-      ),
+              ),
+            ),
     );
   }
 
   /// ✅ EVENTS LIST
   Widget _eventsListSection({
     required String title,
+    required IconData icon,
     required Stream<List<Map<String, dynamic>>> stream,
+    required String emptyText,
+    int? limit,
   }) {
-    return StreamBuilder(
-      stream: stream,
-      builder: (context, snap) {
-        if (!snap.hasData) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          );
-        }
+    return VSectionCard(
+      title: title,
+      icon: icon,
+      trailing: VHeaderLink(
+        label: 'More ...',
+        onTap: () => _open(const CalendarPage()),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: stream,
+        builder: (context, snap) {
+          if (snap.hasError) {
+            return const VEmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load events',
+            );
+          }
+          if (!snap.hasData && snap.connectionState != ConnectionState.done) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-        final events = snap.data!;
+          var events = snap.data ?? const <Map<String, dynamic>>[];
+          if (events.isEmpty) {
+            return VEmptyState(icon: Icons.event_available, title: emptyText);
+          }
+          if (limit != null && events.length > limit) {
+            events = events.sublist(0, limit);
+          }
 
-        return _wrapContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return Column(
             children: [
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.event, color: Colors.white, size: 22),
-                    const SizedBox(width: 10),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: events.length,
-                itemBuilder: (_, i) {
-                  final e = events[i];
-                  final isLast = i == events.length - 1;
-
-                  return Container(
-                    margin: EdgeInsets.only(bottom: isLast ? 0 : 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                e["title"],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 17,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "${e['time']} • ${e['date'].day}/${e['date'].month}/${e['date'].year}",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              for (var i = 0; i < events.length; i++) ...[
+                if (i > 0) const Divider(height: 1),
+                _eventRow(events[i]),
+              ],
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
-  /// ✅ Container Styling
-  Widget _wrapContainer({required Widget child}) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+  Widget _eventRow(Map<String, dynamic> e) {
+    final DateTime date = e['date'];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          const Icon(Icons.bolt, color: AppColors.maroon, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              e["title"] ?? '',
+              style: GoogleFonts.inter(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          Text(
+            "${e['time'] ?? ''} • ${date.day}/${date.month}/${date.year}",
+            style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
+          ),
+        ],
       ),
-      child: child,
+    );
+  }
+
+  Widget _buildDrawer() {
+    final email = widget.user?.email ?? '';
+    return Drawer(
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+              20,
+              MediaQuery.of(context).padding.top + 20,
+              20,
+              20,
+            ),
+            decoration: const BoxDecoration(gradient: AppColors.headerGradient),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: VAvatar(name: name, photoUrl: photoUrl, radius: 30),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  name.isEmpty ? 'V-Connect' : name,
+                  style: GoogleFonts.inter(
+                    color: AppColors.onPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (dept.isNotEmpty)
+                  Text(
+                    dept,
+                    style: GoogleFonts.inter(
+                      color: AppColors.onPrimary.withOpacity(0.85),
+                      fontSize: 13,
+                    ),
+                  ),
+                if (email.isNotEmpty)
+                  Text(
+                    email,
+                    style: GoogleFonts.inter(
+                      color: AppColors.onPrimary.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _drawerItem(Icons.home_outlined, 'Dashboard', () {}),
+                _drawerItem(
+                  Icons.person_search_outlined,
+                  'Search Faculty',
+                  () => _open(const SearchPage()),
+                ),
+                _drawerItem(
+                  Icons.event_note_outlined,
+                  'Events Calendar',
+                  () => _open(const CalendarPage()),
+                ),
+                _drawerItem(
+                  Icons.forum_outlined,
+                  'Messages',
+                  () => _open(const ChatHomePage()),
+                ),
+                _drawerItem(
+                  Icons.table_chart_outlined,
+                  'Time Table',
+                  timetableUrl == null ? uploadTimetable : _showTimetablePopup,
+                ),
+                const Divider(),
+                _drawerItem(
+                  Icons.manage_accounts_outlined,
+                  'Profile & Settings',
+                  () => _open(const ProfilePage()),
+                ),
+                _drawerItem(
+                  Icons.logout,
+                  'Logout',
+                  _logout,
+                  color: AppColors.danger,
+                ),
+              ],
+            ),
+          ),
+          const VFooter(),
+        ],
+      ),
+    );
+  }
+
+  Widget _drawerItem(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    Color color = AppColors.textPrimary,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: color == AppColors.textPrimary ? AppColors.primary : color,
+      ),
+      title: Text(
+        label,
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      dense: true,
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
     );
   }
 }

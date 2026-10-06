@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'chat_page.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
@@ -57,16 +59,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.inter(color: Colors.white)),
-        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    showVSnackBar(context, message, isError: isError);
   }
 
   Future<void> _navigateToChat(Map<String, dynamic> otherUser) async {
@@ -223,19 +216,19 @@ class _ChatHomePageState extends State<ChatHomePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
+                color: AppColors.danger.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
                 Icons.delete_outline,
-                color: Colors.red,
+                color: AppColors.danger,
                 size: 24,
               ),
             ),
@@ -244,7 +237,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
               child: Text(
                 'Delete Group?',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -255,7 +248,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         content: Text(
           'This will permanently delete the group for all members. This action cannot be undone.',
           style: GoogleFonts.inter(
-            color: Colors.white.withOpacity(0.7),
+            color: AppColors.ink.withOpacity(0.7),
             fontSize: 14,
             height: 1.5,
           ),
@@ -266,7 +259,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.7),
+                color: AppColors.ink.withOpacity(0.7),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -274,7 +267,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.danger,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -282,7 +275,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: Text(
               'Delete',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.onPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -320,41 +313,33 @@ class _ChatHomePageState extends State<ChatHomePage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const SizedBox(height: 10),
+            const VSheetHandle(),
             const SizedBox(height: 20),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.accentGreen.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.group_add,
-                  color: Colors.white,
+                  color: AppColors.accentGreen,
                   size: 24,
                 ),
               ),
               title: Text(
                 'New Group',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -362,7 +347,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
               subtitle: Text(
                 'Create a group with multiple people',
                 style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.6),
+                  color: AppColors.ink.withOpacity(0.6),
                   fontSize: 13,
                 ),
               ),
@@ -400,7 +385,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 }).toList();
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF1A1A1A),
+            backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -409,12 +394,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: AppColors.accentGreen.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.group_add,
-                    color: Colors.white,
+                    color: AppColors.accentGreen,
                     size: 24,
                   ),
                 ),
@@ -422,7 +407,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 Text(
                   'Create Group',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
@@ -436,17 +421,17 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 children: [
                   TextField(
                     controller: groupNameController,
-                    style: GoogleFonts.inter(color: Colors.white),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Enter group name',
                       hintStyle: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.5),
+                        color: AppColors.ink.withOpacity(0.5),
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: AppColors.ink.withOpacity(0.1),
                       prefixIcon: Icon(
                         Icons.people,
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.ink.withOpacity(0.7),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -457,24 +442,24 @@ class _ChatHomePageState extends State<ChatHomePage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: memberSearchController,
-                    style: GoogleFonts.inter(color: Colors.white),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                     onChanged: (v) => setDialogState(() {}),
                     decoration: InputDecoration(
                       hintText: 'Search members...',
                       hintStyle: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.5),
+                        color: AppColors.ink.withOpacity(0.5),
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: AppColors.ink.withOpacity(0.1),
                       prefixIcon: Icon(
                         Icons.search,
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.ink.withOpacity(0.7),
                       ),
                       suffixIcon: memberSearchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear,
-                                color: Colors.white.withOpacity(0.7),
+                                color: AppColors.ink.withOpacity(0.7),
                               ),
                               onPressed: () {
                                 memberSearchController.clear();
@@ -493,21 +478,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: AppColors.ink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.people,
-                            color: Colors.white,
+                            color: AppColors.primary,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             '${selectedMembers.length} member${selectedMembers.length > 1 ? 's' : ''} selected',
                             style: GoogleFonts.inter(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -520,14 +505,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     child: Container(
                       constraints: const BoxConstraints(maxHeight: 300),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: AppColors.ink.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: _isLoading
                           ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
+                              child: CircularProgressIndicator(),
                             )
                           : filteredUsers.isEmpty
                           ? Center(
@@ -539,13 +522,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                     Icon(
                                       Icons.people_outline,
                                       size: 48,
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: AppColors.ink.withOpacity(0.5),
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
                                       'No members found',
                                       style: GoogleFonts.inter(
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: AppColors.ink.withOpacity(0.7),
                                       ),
                                     ),
                                   ],
@@ -567,7 +550,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? Colors.white.withOpacity(0.1)
+                                        ? AppColors.primary.withOpacity(0.08)
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
@@ -587,20 +570,20 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                       title: Text(
                                         user['name'] ?? 'No Name',
                                         style: GoogleFonts.inter(
-                                          color: Colors.white,
+                                          color: AppColors.textPrimary,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                       subtitle: Text(
                                         user['email'] ?? '',
                                         style: GoogleFonts.inter(
-                                          color: Colors.white.withOpacity(0.6),
+                                          color: AppColors.ink.withOpacity(0.6),
                                           fontSize: 12,
                                         ),
                                       ),
                                       secondary: CircleAvatar(
                                         backgroundColor:
-                                            Colors.white.withOpacity(0.2),
+                                            AppColors.primary.withOpacity(0.12),
                                         child: ClipOval(
                                           child: user['photoUrl'] is String &&
                                                   (user['photoUrl'] as String)
@@ -618,7 +601,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                                                 'U')[0]
                                                             .toUpperCase(),
                                                         style: GoogleFonts.inter(
-                                                          color: Colors.white,
+                                                          color: AppColors.textPrimary,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
@@ -630,14 +613,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
                                                   (user['name'] ?? 'U')[0]
                                                       .toUpperCase(),
                                                   style: GoogleFonts.inter(
-                                                    color: Colors.white,
+                                                    color: AppColors.textPrimary,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                         ),
                                       ),
-                                      activeColor: Colors.white,
-                                      checkColor: Colors.black,
+                                      activeColor: AppColors.primary,
+                                      checkColor: AppColors.onPrimary,
                                     ),
                                   ),
                                 );
@@ -654,7 +637,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 child: Text(
                   'Cancel',
                   style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.7),
+                    color: AppColors.ink.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -676,10 +659,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -688,7 +667,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 child: Text(
                   'Create',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.onPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
@@ -755,7 +734,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
       return Center(
         child: Text(
           "Please log in.",
-          style: GoogleFonts.inter(color: Colors.white.withOpacity(0.6)),
+          style: GoogleFonts.inter(color: AppColors.ink.withOpacity(0.6)),
         ),
       );
     }
@@ -769,7 +748,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+            child: CircularProgressIndicator(),
           );
         }
 
@@ -787,16 +766,16 @@ class _ChatHomePageState extends State<ChatHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+                Icon(Icons.error_outline, size: 64, color: AppColors.danger),
                 const SizedBox(height: 16),
                 Text(
                   'Error loading chats',
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Please check your connection',
-                  style: GoogleFonts.inter(color: Colors.white54, fontSize: 14),
+                  style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 Padding(
@@ -804,7 +783,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                   child: Text(
                     errStr,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(color: Colors.red.shade300, fontSize: 11),
+                    style: GoogleFonts.inter(color: AppColors.danger, fontSize: 11),
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -862,13 +841,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
                       ? Icons.chat_bubble_outline
                       : Icons.filter_list_off,
                   size: 80,
-                  color: Colors.white.withOpacity(0.3),
+                  color: AppColors.ink.withOpacity(0.3),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   "No conversations yet",
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
@@ -880,7 +859,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     "Tap the search icon to find users and start a new chat.",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.6),
+                      color: AppColors.ink.withOpacity(0.6),
                       fontSize: 14,
                     ),
                   ),
@@ -911,7 +890,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
   Widget _buildUserSearchList(String searchQuery) {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -931,16 +910,16 @@ class _ChatHomePageState extends State<ChatHomePage> {
               Icon(
                 Icons.person_off_outlined,
                 size: 48,
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.ink.withOpacity(0.5),
               ),
               const SizedBox(height: 12),
               Text(
                 'No users found',
-                style: GoogleFonts.inter(color: Colors.white.withOpacity(0.7)),
+                style: GoogleFonts.inter(color: AppColors.ink.withOpacity(0.7)),
               ),
               Text(
                 'Try a different search term',
-                style: GoogleFonts.inter(color: Colors.white54),
+                style: GoogleFonts.inter(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -954,10 +933,11 @@ class _ChatHomePageState extends State<ChatHomePage> {
       itemBuilder: (context, index) {
         final user = filteredUsers[index];
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(4),
+            color: AppColors.surface,
+            boxShadow: vCardShadow,
           ),
           child: Material(
           color: Colors.transparent,
@@ -966,7 +946,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           child: ListTile(
             onTap: () => _navigateToChat(user),
             leading: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: AppColors.primary.withOpacity(0.12),
               child: ClipOval(
                 child: user['photoUrl'] is String &&
                         (user['photoUrl'] as String).isNotEmpty
@@ -980,7 +960,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                             child: Text(
                               (user['name'] ?? 'U')[0].toUpperCase(),
                               style: GoogleFonts.inter(
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -991,7 +971,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                         child: Text(
                           (user['name'] ?? 'U')[0].toUpperCase(),
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1001,21 +981,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
             title: Text(
               user['name'] ?? 'No Name',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
             subtitle: Text(
               user['email'] ?? '',
               style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.6),
+                color: AppColors.ink.withOpacity(0.6),
                 fontSize: 12,
               ),
             ),
             trailing: Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.ink.withOpacity(0.5),
             ),
           ),
         ),
@@ -1027,33 +1007,33 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = _filterType == value;
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (selected) setState(() => _filterType = value);
-        },
-        labelStyle: GoogleFonts.inter(
-          color: isSelected ? Colors.black : Colors.white.withOpacity(0.8),
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-        backgroundColor: const Color(0xFF2A2A2A),
-        selectedColor: Colors.grey.shade300,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected
-                ? Colors.grey.shade300
-                : Colors.white.withOpacity(0.2),
-            width: 1.5,
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: () => setState(() => _filterType = value),
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : AppColors.primary.withOpacity(0.35),
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: isSelected ? AppColors.onPrimary : AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        showCheckmark: false,
-        elevation: isSelected ? 2 : 0,
       ),
     );
   }
@@ -1065,17 +1045,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
         : (_filterType == 'archived' ? 'Archived Chats' : 'Messages');
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        elevation: 0,
-        shape: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.2))),
+      backgroundColor: AppColors.background,
+      appBar: VAppBar(
         leading: IconButton(
           icon: Icon(
             _isSearching || _filterType == 'archived'
                 ? Icons.close
-                : Icons.arrow_back_ios_new,
-            color: Colors.white,
+                : Icons.arrow_back,
           ),
           onPressed: () {
             if (_isSearching) {
@@ -1092,22 +1068,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
             }
           },
         ),
-        title: Text(
-          appBarTitle,
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
+        title: appBarTitle,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
+            icon: const Icon(Icons.search),
             onPressed: () => setState(() => _isSearching = true),
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
+            icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               if (value == 'archived') {
                 setState(() {
@@ -1124,11 +1092,11 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 value: 'refresh',
                 child: Row(
                   children: [
-                    const Icon(Icons.refresh, color: Colors.white),
+                    const Icon(Icons.refresh, color: AppColors.primary),
                     const SizedBox(width: 12),
                     Text(
                       'Refresh',
-                      style: GoogleFonts.inter(color: Colors.white),
+                      style: GoogleFonts.inter(color: AppColors.textPrimary),
                     ),
                   ],
                 ),
@@ -1137,117 +1105,78 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 value: 'archived',
                 child: Row(
                   children: [
-                    const Icon(Icons.archive_outlined, color: Colors.white),
+                    const Icon(
+                      Icons.archive_outlined,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       'Archived Chats',
-                      style: GoogleFonts.inter(color: Colors.white),
+                      style: GoogleFonts.inter(color: AppColors.textPrimary),
                     ),
                   ],
                 ),
               ),
             ],
-            color: const Color(0xFF2A2A2A),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Color(0xFF111111), Colors.black],
-          ),
-        ),
-        child: Column(
-          children: [
-            if (_isSearching)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  style: GoogleFonts.inter(color: Colors.white),
-                  onChanged: (value) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'Search users...',
-                    hintStyle: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.5),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.1),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: Colors.white.withOpacity(0.7),
-                            ),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() {});
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              )
-            else
-              Container(
-                height: 60,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildFilterChip('All', 'all'),
-                    _buildFilterChip('Unread', 'unread'),
-                    _buildFilterChip('Personal', 'personal'),
-                    _buildFilterChip('Groups', 'groups'),
-                  ],
+      body: Column(
+        children: [
+          if (_isSearching)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: GoogleFonts.inter(color: AppColors.textPrimary),
+                onChanged: (value) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Search users...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {});
+                          },
+                        )
+                      : null,
                 ),
               ),
-            Expanded(
-              child: _isSearching
-                  ? _buildUserSearchList(_searchController.text)
-                  : _buildChatsList(),
+            )
+          else
+            Container(
+              height: 52,
+              color: AppColors.surface,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildFilterChip('All', 'all'),
+                  _buildFilterChip('Unread', 'unread'),
+                  _buildFilterChip('Personal', 'personal'),
+                  _buildFilterChip('Groups', 'groups'),
+                ],
+              ),
             ),
-          ],
-        ),
+          Expanded(
+            child: _isSearching
+                ? _buildUserSearchList(_searchController.text)
+                : _buildChatsList(),
+          ),
+        ],
       ),
       floatingActionButton: _isSearching
           ? null
-          : Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withOpacity(0.25)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: FloatingActionButton(
-                onPressed: _showNewChatOptions,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                child: const Icon(Icons.add, color: Colors.white, size: 28),
-              ),
+          : FloatingActionButton(
+              onPressed: _showNewChatOptions,
+              tooltip: 'New chat',
+              child: const Icon(Icons.add_comment_outlined),
             ),
     );
   }
@@ -1296,35 +1225,35 @@ class _ChatListItem extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         child: Dismissible(
           key: key!,
           background: Container(
             decoration: BoxDecoration(
-              color: isArchived ? Colors.blue.shade700 : Colors.green.shade700,
-              borderRadius: BorderRadius.circular(12),
+              color: isArchived ? AppColors.primary : AppColors.success,
+              borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: Icon(
               isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
-              color: Colors.white,
+              color: AppColors.onPrimary,
             ),
           ),
           // MODIFIED: Secondary background for left-swipe is now only for groups.
           secondaryBackground: (!isArchived && isGroup)
               ? Container(
                   decoration: BoxDecoration(
-                    color: Colors.red.shade900,
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.danger,
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
                   child: const Icon(
                     Icons.delete_forever_outlined,
-                    color: Colors.white,
+                    color: AppColors.onPrimary,
                   ),
                 )
               : Container(
@@ -1388,14 +1317,23 @@ class _ChatListItem extends StatelessWidget {
   ) {
     final Timestamp? timestamp = chatData['lastMessageTimestamp'];
     final itemBackgroundColor = unreadCount > 0
-        ? Colors.white.withOpacity(0.15)
-        : const Color(0xFF1A1A1A);
+        ? Color.alphaBlend(
+            AppColors.primary.withOpacity(0.06),
+            AppColors.surface,
+          )
+        : AppColors.surface;
 
     return Container(
       decoration: BoxDecoration(
         color: itemBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(4),
+        border: Border(
+          left: BorderSide(
+            color: unreadCount > 0 ? AppColors.primary : AppColors.border,
+            width: 3,
+          ),
+        ),
+        boxShadow: vCardShadow,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1411,7 +1349,7 @@ class _ChatListItem extends StatelessWidget {
           builder: (context, snapshot) => Text(
             snapshot.data ?? (isGroup ? "Group" : "Chat"),
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.w600,
               fontSize: 16,
             ),
@@ -1428,8 +1366,8 @@ class _ChatListItem extends StatelessWidget {
                 _formatTimestamp(timestamp),
                 style: GoogleFonts.inter(
                   color: unreadCount > 0
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.5),
+                      ? AppColors.primary
+                      : AppColors.textMuted,
                   fontSize: 12,
                   fontWeight: unreadCount > 0
                       ? FontWeight.w600
@@ -1445,13 +1383,13 @@ class _ChatListItem extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade400,
+                    color: AppColors.danger,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     unreadCount > 99 ? '99+' : unreadCount.toString(),
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1500,8 +1438,8 @@ class _ChatListItem extends StatelessWidget {
     if (isGroup) {
       avatarWidget = CircleAvatar(
         radius: 28,
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.group, color: Colors.white, size: 28),
+        backgroundColor: AppColors.accentGreen,
+        child: const Icon(Icons.group, color: AppColors.onPrimary, size: 28),
       );
     } else {
       avatarWidget = StreamBuilder<DocumentSnapshot>(
@@ -1513,7 +1451,7 @@ class _ChatListItem extends StatelessWidget {
           if (!userSnapshot.hasData || userSnapshot.data?.data() == null) {
             return CircleAvatar(
               radius: 28,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: AppColors.ink.withOpacity(0.1),
             );
           }
           final otherUserData =
@@ -1524,7 +1462,7 @@ class _ChatListItem extends StatelessWidget {
 
           return CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.white.withOpacity(0.2),
+            backgroundColor: AppColors.primary.withOpacity(0.12),
             child: ClipOval(
               child: photoUrl != null && (photoUrl as String).isNotEmpty
                   ? Image.network(
@@ -1539,7 +1477,7 @@ class _ChatListItem extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
-                              color: Colors.white,
+                              color: AppColors.primary,
                             ),
                           ),
                         );
@@ -1551,7 +1489,7 @@ class _ChatListItem extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
-                          color: Colors.white,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -1580,7 +1518,7 @@ class _ChatListItem extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: const BoxDecoration(
-                  color: Colors.redAccent,
+                  color: AppColors.danger,
                   shape: BoxShape.circle,
                 ),
               ),

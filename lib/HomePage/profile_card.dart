@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import for getting the current user
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import for updating Firestore
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class ProfileCard extends StatefulWidget {
   final String name;
@@ -59,12 +61,15 @@ class _ProfileCardState extends State<ProfileCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(4),
+        border: const Border(
+          top: BorderSide(color: AppColors.maroon, width: 2),
+        ),
+        boxShadow: vCardShadow,
       ),
       child: Row(
         children: [
@@ -75,7 +80,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 Text(
                   widget.name,
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -84,7 +89,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 Text(
                   widget.dept,
                   style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.7),
+                    color: AppColors.textSecondary,
                     fontSize: 16,
                   ),
                 ),
@@ -92,7 +97,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 Text(
                   widget.customId,
                   style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.5),
+                    color: AppColors.textMuted,
                     fontSize: 14,
                   ),
                 ),
@@ -113,8 +118,8 @@ class _ProfileCardState extends State<ProfileCard> {
                   // 2. Call the function to update the database in the background
                   _updateOnlineStatus(value);
                 },
-                activeColor: Colors.grey.shade600,
-                trackColor: Colors.black.withOpacity(0.3),
+                activeTrackColor: AppColors.success,
+                inactiveTrackColor: AppColors.border,
               ),
               const SizedBox(height: 8),
               Text(
@@ -123,8 +128,8 @@ class _ProfileCardState extends State<ProfileCard> {
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: _isOn
-                      ? Colors.greenAccent.shade400
-                      : Colors.redAccent.shade200,
+                      ? AppColors.success
+                      : AppColors.danger,
                 ),
               ),
             ],

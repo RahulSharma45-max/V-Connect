@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:v_connect/LoginPage/login_page.dart';
 import 'package:v_connect/Profile/edit_profile.dart';
+import 'package:v_connect/Faculty/faculty_profile_page.dart';
 import 'package:v_connect/theme/app_theme.dart';
 import 'package:v_connect/theme/widgets.dart';
 
@@ -53,6 +54,20 @@ class ProfilePage extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
+                    _settingsTile(
+                      icon: Icons.account_box_outlined,
+                      title: "My Faculty Profile",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                FacultyProfilePage(facultyId: user.uid),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
                     _settingsTile(
                       icon: Icons.edit_outlined,
                       title: "Edit Profile",

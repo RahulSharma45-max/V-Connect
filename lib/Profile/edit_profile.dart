@@ -15,6 +15,16 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _phoneController = TextEditingController();
+
+  /// Optional faculty details shown on the Faculty profile page, keyed by
+  /// their Firestore field name.
+  final Map<String, TextEditingController> _facultyFields = {
+    'designation': TextEditingController(),
+    'cabin': TextEditingController(),
+    'specialization': TextEditingController(),
+    'officeHours': TextEditingController(),
+  };
+
   bool _isLoading = false;
 
   @override
@@ -29,11 +39,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
       FirebaseFirestore.instance.collection('users').doc(user.uid).get().then((
         doc,
       ) {
-        if (mounted && doc.exists && doc.data()!.containsKey('phoneNumber')) {
-          setState(() {
-            _phoneController.text = doc.data()!['phoneNumber'];
+        final data = doc.data();
+        if (!mounted || !doc.exists || data == null) return;
+        setState(() {
+          if (data.containsKey('phoneNumber')) {
+            _phoneController.text = data['phoneNumber'];
+          }
+          _facultyFields.forEach((field, controller) {
+            controller.text = (data[field] ?? '').toString();
           });
-        }
+        });
       });
     }
   }
@@ -41,6 +56,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void dispose() {
     _phoneController.dispose();
+    for (final controller in _facultyFields.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -66,8 +84,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not found");
 
-      final dataToUpdate = {
-        'phoneNumber': phoneNumber, // ✅ ONLY field used
+      final dataToUpdate = <String, dynamic>{
+        'phoneNumber': phoneNumber,
+        for (final entry in _facultyFields.entries)
+          entry.key: entry.value.text.trim(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -110,41 +130,71 @@ class _EditProfilePageState extends State<EditProfilePage> {
           VSectionCard(
             title: 'Contact Details',
             icon: Icons.contact_phone_outlined,
+            child: _buildTextField(
+              controller: _phoneController,
+              labelText: "Phone Number",
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              digitsOnly: true,
+            ),
+          ),
+          VSectionCard(
+            title: 'Faculty Details',
+            icon: Icons.work_outline,
             child: Column(
               children: [
                 _buildTextField(
-                  controller: _phoneController,
-                  labelText: "Phone Number",
-                  icon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
+                  controller: _facultyFields['designation']!,
+                  labelText: "Designation (e.g. Assistant Professor)",
+                  icon: Icons.work_outline,
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: _isLoading ? null : _saveProfile,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.onPrimary,
-                            ),
-                          )
-                        : Text(
-                            "Save Changes",
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                  ),
+                const SizedBox(height: 14),
+                _buildTextField(
+                  controller: _facultyFields['cabin']!,
+                  labelText: "Cabin / Room",
+                  icon: Icons.meeting_room_outlined,
+                ),
+                const SizedBox(height: 14),
+                _buildTextField(
+                  controller: _facultyFields['specialization']!,
+                  labelText: "Specialization",
+                  icon: Icons.school_outlined,
+                ),
+                const SizedBox(height: 14),
+                _buildTextField(
+                  controller: _facultyFields['officeHours']!,
+                  labelText: "Office Hours (e.g. Mon–Fri, 2–4 PM)",
+                  icon: Icons.schedule_outlined,
                 ),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _isLoading ? null : _saveProfile,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onPrimary,
+                        ),
+                      )
+                    : Text(
+                        "Save Changes",
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
             ),
           ),
         ],
@@ -157,14 +207,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     required String labelText,
     required IconData icon,
     TextInputType? keyboardType,
+    bool digitsOnly = false,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      inputFormatters: [
-        LengthLimitingTextInputFormatter(10),
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      textCapitalization: digitsOnly
+          ? TextCapitalization.none
+          : TextCapitalization.words,
+      inputFormatters: digitsOnly
+          ? [
+              LengthLimitingTextInputFormatter(10),
+              FilteringTextInputFormatter.digitsOnly,
+            ]
+          : [LengthLimitingTextInputFormatter(80)],
       style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 15),
       decoration: InputDecoration(labelText: labelText, prefixIcon: Icon(icon)),
     );

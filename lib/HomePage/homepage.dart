@@ -9,6 +9,8 @@ import 'package:v_connect/LoginPage/login_page.dart';
 import 'package:v_connect/Profile/edit_profile.dart';
 import 'package:v_connect/Profile/profile.dart';
 import 'package:v_connect/Search/search_page.dart';
+import 'package:v_connect/Faculty/faculty_directory_page.dart';
+import 'package:v_connect/Faculty/faculty_profile_page.dart';
 import 'package:v_connect/theme/app_theme.dart';
 import 'package:v_connect/theme/widgets.dart';
 import 'package:photo_view/photo_view.dart';
@@ -544,6 +546,12 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
   Widget _moduleGrid() {
     final tiles = [
       VModuleTile(
+        label: 'Faculty',
+        icon: Icons.groups_outlined,
+        color: AppColors.maroon,
+        onTap: () => _open(const FacultyDirectoryPage()),
+      ),
+      VModuleTile(
         label: 'Search',
         icon: Icons.person_search,
         color: AppColors.accentBlue,
@@ -560,6 +568,12 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
         icon: Icons.forum_outlined,
         color: AppColors.accentGreen,
         onTap: () => _open(const ChatHomePage()),
+      ),
+      VModuleTile(
+        label: 'Timetable',
+        icon: Icons.table_chart_outlined,
+        color: AppColors.accentIndigo,
+        onTap: timetableUrl == null ? uploadTimetable : _showTimetablePopup,
       ),
       VModuleTile(
         label: 'Profile',
@@ -828,6 +842,11 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
               children: [
                 _drawerItem(Icons.home_outlined, 'Dashboard', () {}),
                 _drawerItem(
+                  Icons.groups_outlined,
+                  'Faculty Directory',
+                  () => _open(const FacultyDirectoryPage()),
+                ),
+                _drawerItem(
                   Icons.person_search_outlined,
                   'Search Faculty',
                   () => _open(const SearchPage()),
@@ -848,6 +867,13 @@ class _HomepageState extends State<Homepage> with WidgetsBindingObserver {
                   timetableUrl == null ? uploadTimetable : _showTimetablePopup,
                 ),
                 const Divider(),
+                if (widget.user != null)
+                  _drawerItem(
+                    Icons.account_box_outlined,
+                    'My Faculty Profile',
+                    () =>
+                        _open(FacultyProfilePage(facultyId: widget.user!.uid)),
+                  ),
                 _drawerItem(
                   Icons.manage_accounts_outlined,
                   'Profile & Settings',

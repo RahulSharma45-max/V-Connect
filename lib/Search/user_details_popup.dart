@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:v_connect/Chat/chat_page.dart';
+import 'package:v_connect/Chat/direct_chat.dart';
+import 'package:v_connect/Faculty/faculty_profile_page.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:v_connect/theme/app_theme.dart';
 import 'package:v_connect/theme/widgets.dart';
@@ -13,51 +15,11 @@ class UserDetailsPopup extends StatelessWidget {
   const UserDetailsPopup({super.key, required this.userData});
 
   Future<void> _navigateToChat(BuildContext context) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
-
-    final String? rawOtherId =
-        (userData['id'] != null && userData['id'].toString().isNotEmpty)
-        ? userData['id'].toString()
-        : ((userData['uid'] != null && userData['uid'].toString().isNotEmpty)
-              ? userData['uid'].toString()
-              : null);
-
-    if (rawOtherId == null ||
-        rawOtherId.isEmpty ||
-        rawOtherId == currentUser.uid) {
-      debugPrint('[UserDetailsPopup] Invalid recipient ID: $rawOtherId');
-      return;
-    }
-
-    final String otherUserId = rawOtherId;
-    final Map<String, dynamic> preparedOtherUser = Map<String, dynamic>.from(
-      userData,
-    );
-    preparedOtherUser['id'] = otherUserId;
-    preparedOtherUser['uid'] = otherUserId;
-
-    List<String> ids = [currentUser.uid, otherUserId]..sort();
-    String chatRoomId = ids.join('_');
-
     try {
-      final chatRef = FirebaseFirestore.instance
-          .collection('chats')
-          .doc(chatRoomId);
-      final doc = await chatRef.get();
-      if (doc.exists) {
-        await chatRef.update({'unreadCount.${currentUser.uid}': 0});
-      } else {
-        await chatRef.set({
-          'participants': [currentUser.uid, otherUserId],
-          'isGroup': false,
-          'createdAt': FieldValue.serverTimestamp(),
-          'lastMessage': 'Chat started',
-          'lastMessageTimestamp': FieldValue.serverTimestamp(),
-          'lastMessageSenderId': currentUser.uid,
-          'unreadCount': {currentUser.uid: 0, otherUserId: 0},
-          'archivedBy': {currentUser.uid: false, otherUserId: false},
-        });
+      final chat = await ensureDirectChat(userData);
+      if (chat == null) {
+        debugPrint('[UserDetailsPopup] Invalid recipient: ${userData['id']}');
+        return;
       }
 
       if (context.mounted) {
@@ -65,8 +27,10 @@ class UserDetailsPopup extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                ChatPage(chatRoomId: chatRoomId, otherUser: preparedOtherUser),
+            builder: (context) => ChatPage(
+              chatRoomId: chat.chatRoomId,
+              otherUser: chat.otherUser,
+            ),
           ),
         );
       }
@@ -408,6 +372,26 @@ class UserDetailsPopup extends StatelessWidget {
                       ),
                     ],
                   ],
+                ),
+                const SizedBox(height: 4),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FacultyProfilePage(
+                          facultyId: uid,
+                          initialData: userData,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.account_box_outlined, size: 18),
+                  label: const Text('View full faculty profile'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.maroon,
+                  ),
                 ),
               ],
             ),

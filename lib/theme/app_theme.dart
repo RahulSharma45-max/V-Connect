@@ -36,6 +36,7 @@ class AppColors {
   static const Color accentGold = Color(0xFFC99A06);
   static const Color accentGreen = Color(0xFF198754);
   static const Color accentCyan = Color(0xFF0AA2C0);
+  static const Color accentIndigo = Color(0xFF5B3CC4);
 
   // Status
   static const Color success = Color(0xFF198754);

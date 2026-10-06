@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:v_connect/HomePage/homepage.dart'; // Ensure this path is correct
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class SignInButton extends StatelessWidget {
   final TextEditingController usernameController;
@@ -13,26 +15,17 @@ class SignInButton extends StatelessWidget {
     super.key,
   });
 
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.inter(color: Colors.white)),
-        backgroundColor: Colors.redAccent.shade200.withOpacity(0.9),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: () async {
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (context) => const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+              child: CircularProgressIndicator(color: AppColors.onPrimary),
             ),
           );
 
@@ -53,26 +46,20 @@ class SignInButton extends StatelessWidget {
             );
           } on FirebaseAuthException catch (e) {
             if (context.mounted) Navigator.of(context).pop();
-            _showErrorSnackBar(
+            showVSnackBar(
               context,
               e.message ?? "An unknown error occurred.",
+              isError: true,
             );
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white.withOpacity(0.15),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 14),
         ),
-        child: Text(
+        icon: const Icon(Icons.login, size: 20),
+        label: Text(
           'Sign In',
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

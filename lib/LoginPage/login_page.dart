@@ -4,6 +4,8 @@ import 'package:v_connect/LoginPage/forgot_password.dart';
 import 'package:v_connect/LoginPage/username.dart';
 import 'package:v_connect/LoginPage/password.dart';
 import 'package:v_connect/LoginPage/sign_in.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -28,85 +30,94 @@ class _LoginPageState extends State<LoginPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.black, Color(0xFF111111), Colors.black],
-            ),
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 60),
-                  Text(
-                    'V-CONNECT',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
+        backgroundColor: AppColors.background,
+        appBar: const VAppBar(
+          titleWidget: VBrandMark(),
+          automaticallyImplyLeading: false,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        'V-Connect connects your campus',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          color: AppColors.primary,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Get Started',
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Text(
+                        'One platform for faculty messaging, events, timetables and presence.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    VSectionCard(
+                      title: 'Faculty Login',
+                      icon: Icons.badge_outlined,
+                      accent: AppColors.primary,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          UserName(usernameController),
+                          const SizedBox(height: 16),
+                          PasswordField(passwordController),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ForgotPassword(usernameController),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Let\'s get started by filling out the form below.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        UserName(usernameController),
-                        const SizedBox(height: 20),
-                        PasswordField(passwordController),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [ForgotPassword(usernameController)],
-                        ),
-                        const SizedBox(height: 20),
-                        SignInButton(usernameController, passwordController),
-                      ],
+                          const SizedBox(height: 8),
+                          SignInButton(usernameController, passwordController),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.lock_outline,
+                            size: 14,
+                            color: AppColors.textMuted,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'Accounts are issued by the campus administrator.',
+                              style: GoogleFonts.inter(
+                                color: AppColors.textMuted,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+            const VFooter(),
+          ],
         ),
       ),
     );

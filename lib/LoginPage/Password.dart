@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:v_connect/theme/app_theme.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController passwordController;
@@ -16,39 +17,20 @@ class _PasswordFieldState extends State<PasswordField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.passwordController,
-      cursorColor: Colors.blue,
       obscureText: _isPasswordObscured,
-      style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
+      style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 15),
       decoration: InputDecoration(
         labelText: "Password",
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-        prefixIcon: Icon(
-          Icons.lock_outline,
-          color: Colors.white.withOpacity(0.6),
-        ),
+        prefixIcon: const Icon(Icons.lock_outline),
         suffixIcon: IconButton(
           icon: Icon(
             _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-            color: Colors.white.withOpacity(0.6),
           ),
           onPressed: () {
             setState(() {
               _isPasswordObscured = !_isPasswordObscured;
             });
           },
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.5),
-            width: 1.5,
-          ),
         ),
       ),
     );

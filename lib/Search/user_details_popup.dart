@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:v_connect/Chat/chat_page.dart';
+import 'package:v_connect/Chat/direct_chat.dart';
+import 'package:v_connect/Faculty/faculty_profile_page.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 class UserDetailsPopup extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -11,53 +15,11 @@ class UserDetailsPopup extends StatelessWidget {
   const UserDetailsPopup({super.key, required this.userData});
 
   Future<void> _navigateToChat(BuildContext context) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
-
-    final String? rawOtherId =
-        (userData['id'] != null && userData['id'].toString().isNotEmpty)
-            ? userData['id'].toString()
-            : ((userData['uid'] != null && userData['uid'].toString().isNotEmpty)
-                ? userData['uid'].toString()
-                : null);
-
-    if (rawOtherId == null || rawOtherId.isEmpty || rawOtherId == currentUser.uid) {
-      debugPrint('[UserDetailsPopup] Invalid recipient ID: $rawOtherId');
-      return;
-    }
-
-    final String otherUserId = rawOtherId;
-    final Map<String, dynamic> preparedOtherUser =
-        Map<String, dynamic>.from(userData);
-    preparedOtherUser['id'] = otherUserId;
-    preparedOtherUser['uid'] = otherUserId;
-
-    List<String> ids = [currentUser.uid, otherUserId]..sort();
-    String chatRoomId = ids.join('_');
-
     try {
-      final chatRef =
-          FirebaseFirestore.instance.collection('chats').doc(chatRoomId);
-      final doc = await chatRef.get();
-      if (doc.exists) {
-        await chatRef.update({'unreadCount.${currentUser.uid}': 0});
-      } else {
-        await chatRef.set({
-          'participants': [currentUser.uid, otherUserId],
-          'isGroup': false,
-          'createdAt': FieldValue.serverTimestamp(),
-          'lastMessage': 'Chat started',
-          'lastMessageTimestamp': FieldValue.serverTimestamp(),
-          'lastMessageSenderId': currentUser.uid,
-          'unreadCount': {
-            currentUser.uid: 0,
-            otherUserId: 0,
-          },
-          'archivedBy': {
-            currentUser.uid: false,
-            otherUserId: false,
-          },
-        });
+      final chat = await ensureDirectChat(userData);
+      if (chat == null) {
+        debugPrint('[UserDetailsPopup] Invalid recipient: ${userData['id']}');
+        return;
       }
 
       if (context.mounted) {
@@ -66,8 +28,8 @@ class UserDetailsPopup extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => ChatPage(
-              chatRoomId: chatRoomId,
-              otherUser: preparedOtherUser,
+              chatRoomId: chat.chatRoomId,
+              otherUser: chat.otherUser,
             ),
           ),
         );
@@ -78,7 +40,7 @@ class UserDetailsPopup extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Could not open chat: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -110,27 +72,21 @@ class UserDetailsPopup extends StatelessWidget {
     if (timetableUrl == null || timetableUrl.isEmpty) {
       showDialog(
         context: context,
-        barrierColor: Colors.black.withOpacity(0.8),
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF1A1A1A),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: Colors.white.withOpacity(0.2)),
-          ),
           title: Row(
             children: [
-              Icon(
-                Icons.table_chart,
-                color: Colors.white.withOpacity(0.8),
+              const Icon(
+                Icons.table_chart_outlined,
+                color: AppColors.maroon,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
                 'No Timetable',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
                 ),
               ),
             ],
@@ -138,26 +94,14 @@ class UserDetailsPopup extends StatelessWidget {
           content: Text(
             'This user has not uploaded a timetable yet.',
             style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 15,
+              color: AppColors.textSecondary,
+              fontSize: 14,
             ),
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'OK',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -185,7 +129,7 @@ class UserDetailsPopup extends StatelessWidget {
                   value: event == null
                       ? 0
                       : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
-                  color: Colors.white,
+                  color: AppColors.onPrimary,
                 ),
               ),
               errorBuilder: (context, error, stackTrace) {
@@ -195,14 +139,14 @@ class UserDetailsPopup extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline,
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.onPrimary.withOpacity(0.7),
                         size: 64,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Failed to load timetable',
                         style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.7),
+                          color: AppColors.onPrimary.withOpacity(0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -217,16 +161,16 @@ class UserDetailsPopup extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
                   ),
-                  child: const Icon(Icons.close, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textPrimary,
+                    size: 22,
+                  ),
                 ),
               ),
             ),
@@ -235,30 +179,26 @@ class UserDetailsPopup extends StatelessWidget {
               left: 20,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 14,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1,
-                  ),
+                  gradient: AppColors.headerGradient,
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
                       Icons.table_chart,
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                       size: 18,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Timetable',
                       style: GoogleFonts.inter(
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -294,35 +234,25 @@ class UserDetailsPopup extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2))),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: VSheetHandle(),
           ),
 
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(6),
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                  ),
+                  color: AppColors.surfaceAlt,
                   child: photoUrl != null && photoUrl.isNotEmpty
                       ? Image.network(
                           photoUrl,
@@ -338,11 +268,10 @@ class UserDetailsPopup extends StatelessWidget {
                                     ? loadingProgress.cumulativeBytesLoaded /
                                           loadingProgress.expectedTotalBytes!
                                     : null,
-                                color: Colors.white,
                               ),
                             );
                           },
-                          errorBuilder: (_, __, ___) {
+                          errorBuilder: (_, _, _) {
                             return _imageFallback(name);
                           },
                         )
@@ -353,16 +282,17 @@ class UserDetailsPopup extends StatelessWidget {
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   name,
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -378,11 +308,11 @@ class UserDetailsPopup extends StatelessWidget {
                     final data = snapshot.data!.data() as Map<String, dynamic>?;
                     final bool isPresent = data?['isPresent'] ?? false;
 
-                    return _buildStatusIndicator(isPresent);
+                    return VStatusChip(isPresent: isPresent);
                   },
                 ),
 
-                Divider(color: Colors.white.withOpacity(0.2), height: 30),
+                const Divider(height: 28),
 
                 _buildDetailRow(Icons.email_outlined, email),
 
@@ -396,62 +326,73 @@ class UserDetailsPopup extends StatelessWidget {
                 const SizedBox(height: 12),
                 _buildDetailRow(Icons.badge_outlined, "ID: $customId"),
 
-                Divider(color: Colors.white.withOpacity(0.2), height: 30),
+                const Divider(height: 28),
 
-                StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(uid)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    String? timetableUrl;
-                    if (snapshot.hasData && snapshot.data != null) {
-                      final data =
-                          snapshot.data!.data() as Map<String, dynamic>?;
-                      timetableUrl = _convertGDriveLink(data?['timetableUrl']);
-                    }
+                Row(
+                  children: [
+                    Expanded(
+                      child: StreamBuilder<DocumentSnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(uid)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          String? timetableUrl;
+                          if (snapshot.hasData && snapshot.data != null) {
+                            final data =
+                                snapshot.data!.data() as Map<String, dynamic>?;
+                            timetableUrl = _convertGDriveLink(
+                              data?['timetableUrl'],
+                            );
+                          }
 
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () =>
-                            _showTimetablePopup(context, timetableUrl),
-                        icon: const Icon(Icons.table_chart, size: 20),
-                        label: const Text("View Timetable"),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: Colors.white.withOpacity(0.15),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          return OutlinedButton.icon(
+                            onPressed: () =>
+                                _showTimetablePopup(context, timetableUrl),
+                            icon: const Icon(Icons.table_chart, size: 18),
+                            label: const Text("Timetable"),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    if (!isOwnProfile) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _navigateToChat(context),
+                          icon: const Icon(Icons.message_outlined, size: 18),
+                          label: const Text("Chat"),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
                           ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FacultyProfilePage(
+                          facultyId: uid,
+                          initialData: userData,
                         ),
                       ),
                     );
                   },
-                ),
-
-                const SizedBox(height: 10),
-
-                if (!isOwnProfile)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _navigateToChat(context),
-                      icon: const Icon(Icons.message_outlined, size: 20),
-                      label: const Text("Chat"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.white.withOpacity(0.15),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
+                  icon: const Icon(Icons.account_box_outlined, size: 18),
+                  label: const Text('View full faculty profile'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.maroon,
                   ),
-
-                const SizedBox(height: 10),
+                ),
               ],
             ),
           ),
@@ -462,55 +403,20 @@ class UserDetailsPopup extends StatelessWidget {
 
   Widget _imageFallback(String name) {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: AppColors.surfaceAlt,
       child: Center(
         child: CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.white.withOpacity(0.2),
+          radius: 56,
+          backgroundColor: AppColors.primary.withOpacity(0.12),
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : '?',
             style: GoogleFonts.inter(
-              fontSize: 48,
+              fontSize: 44,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.primary,
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatusIndicator(bool isPresent) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isPresent
-            ? Colors.green.withOpacity(0.2)
-            : Colors.red.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isPresent ? Colors.green : Colors.red,
-          width: 2,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isPresent ? Icons.check_circle : Icons.cancel,
-            color: isPresent ? Colors.green : Colors.red,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            isPresent ? "PRESENT" : "ABSENT",
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -518,14 +424,14 @@ class UserDetailsPopup extends StatelessWidget {
   Widget _buildDetailRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.6), size: 20),
-        const SizedBox(width: 16),
+        Icon(icon, color: AppColors.primary, size: 20),
+        const SizedBox(width: 14),
         Expanded(
           child: Text(
             text,
             style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              fontSize: 15,
+              color: AppColors.textSecondary,
             ),
           ),
         ),

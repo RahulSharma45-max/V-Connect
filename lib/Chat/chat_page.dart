@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:v_connect/theme/app_theme.dart';
+import 'package:v_connect/theme/widgets.dart';
 
 // Common Emojis
 const List<String> kCommonEmojis = [
@@ -458,7 +460,7 @@ class _ChatPageState extends State<ChatPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+        backgroundColor: isError ? AppColors.danger : AppColors.success,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -526,7 +528,7 @@ class _ChatPageState extends State<ChatPage> {
 
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -546,7 +548,7 @@ class _ChatPageState extends State<ChatPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: AppColors.ink.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -554,7 +556,7 @@ class _ChatPageState extends State<ChatPage> {
                     Text(
                       'Forward ${_selectedMessages.length} Message${_selectedMessages.length > 1 ? 's' : ''} To',
                       style: GoogleFonts.inter(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -562,7 +564,7 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
               ),
-              const Divider(color: Colors.white24, height: 1),
+              const Divider(color: AppColors.border, height: 1),
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -573,7 +575,7 @@ class _ChatPageState extends State<ChatPage> {
                         child: Text(
                           'GROUPS',
                           style: GoogleFonts.inter(
-                            color: Colors.white54,
+                            color: AppColors.textMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
@@ -588,24 +590,24 @@ class _ChatPageState extends State<ChatPage> {
                             (groupData['participants'] as List?)?.length ?? 0;
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: const Color(0xFF1565C0),
+                            backgroundColor: AppColors.primary,
                             child: const Icon(
                               Icons.group,
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                               size: 20,
                             ),
                           ),
                           title: Text(
                             groupName,
                             style: GoogleFonts.inter(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           subtitle: Text(
                             '$participantCount member${participantCount != 1 ? 's' : ''}',
                             style: GoogleFonts.inter(
-                              color: Colors.white54,
+                              color: AppColors.textMuted,
                               fontSize: 12,
                             ),
                           ),
@@ -627,7 +629,7 @@ class _ChatPageState extends State<ChatPage> {
                         child: Text(
                           'CONTACTS',
                           style: GoogleFonts.inter(
-                            color: Colors.white54,
+                            color: AppColors.textMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
@@ -639,14 +641,14 @@ class _ChatPageState extends State<ChatPage> {
                         final userName = userData['name'] ?? 'Unknown User';
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: Colors.grey.shade700,
+                            backgroundColor: AppColors.primary,
                             backgroundImage: userData['photoUrl'] != null
                                 ? NetworkImage(userData['photoUrl'])
                                 : null,
                             child: userData['photoUrl'] == null
                                 ? const Icon(
                                     Icons.person,
-                                    color: Colors.white,
+                                    color: AppColors.onPrimary,
                                     size: 20,
                                   )
                                 : null,
@@ -654,14 +656,14 @@ class _ChatPageState extends State<ChatPage> {
                           title: Text(
                             userName,
                             style: GoogleFonts.inter(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           subtitle: Text(
                             userData['email'] ?? '',
                             style: GoogleFonts.inter(
-                              color: Colors.white54,
+                              color: AppColors.textMuted,
                               fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -686,13 +688,13 @@ class _ChatPageState extends State<ChatPage> {
                             Icon(
                               Icons.people_outline,
                               size: 64,
-                              color: Colors.white.withOpacity(0.3),
+                              color: AppColors.ink.withOpacity(0.3),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'No contacts or groups found',
                               style: GoogleFonts.inter(
-                                color: Colors.white54,
+                                color: AppColors.textMuted,
                                 fontSize: 16,
                               ),
                             ),
@@ -870,7 +872,7 @@ class _ChatPageState extends State<ChatPage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -884,7 +886,7 @@ class _ChatPageState extends State<ChatPage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: AppColors.ink.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -892,7 +894,7 @@ class _ChatPageState extends State<ChatPage> {
               Text(
                 'React to Message',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -913,12 +915,12 @@ class _ChatPageState extends State<ChatPage> {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF1565C0).withOpacity(0.3)
-                            : Colors.white.withOpacity(0.05),
+                            ? AppColors.primary.withOpacity(0.3)
+                            : AppColors.ink.withOpacity(0.05),
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(
-                                color: const Color(0xFF1565C0),
+                                color: AppColors.primary,
                                 width: 2,
                               )
                             : null,
@@ -1109,24 +1111,24 @@ class _ChatPageState extends State<ChatPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Edit Message',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: TextField(
           controller: editController,
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
           maxLines: null,
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Edit your message',
-            hintStyle: GoogleFonts.inter(color: Colors.white54),
+            hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              borderSide: BorderSide(color: AppColors.ink.withOpacity(0.3)),
             ),
             focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF1565C0)),
+              borderSide: BorderSide(color: AppColors.primary),
             ),
           ),
         ),
@@ -1135,7 +1137,7 @@ class _ChatPageState extends State<ChatPage> {
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -1168,7 +1170,7 @@ class _ChatPageState extends State<ChatPage> {
             },
             child: Text(
               'Save',
-              style: GoogleFonts.inter(color: const Color(0xFF1565C0)),
+              style: GoogleFonts.inter(color: AppColors.primary),
             ),
           ),
         ],
@@ -1209,7 +1211,7 @@ class _ChatPageState extends State<ChatPage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1226,7 +1228,7 @@ class _ChatPageState extends State<ChatPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: AppColors.ink.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -1234,7 +1236,7 @@ class _ChatPageState extends State<ChatPage> {
                     Text(
                       'Message Options',
                       style: GoogleFonts.inter(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1242,7 +1244,7 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
               ),
-              const Divider(color: Colors.white24, height: 1),
+              const Divider(color: AppColors.border, height: 1),
               _buildMenuItem(
                 icon: Icons.reply,
                 title: 'Reply',
@@ -1296,11 +1298,11 @@ class _ChatPageState extends State<ChatPage> {
                   _toggleStarMessage(message.id, message.isStarred);
                 },
               ),
-              const Divider(color: Colors.white24, height: 1),
+              const Divider(color: AppColors.border, height: 1),
               _buildMenuItem(
                 icon: Icons.report_outlined,
                 title: 'Report',
-                color: Colors.red,
+                color: AppColors.danger,
                 onTap: () {
                   Navigator.pop(modalContext);
                   _showReportMessageDialog(message.id);
@@ -1318,7 +1320,7 @@ class _ChatPageState extends State<ChatPage> {
               _buildMenuItem(
                 icon: Icons.delete,
                 title: 'Delete',
-                color: Colors.red,
+                color: AppColors.danger,
                 onTap: () {
                   Navigator.pop(modalContext);
                   _showDeleteOptions(message);
@@ -1336,12 +1338,12 @@ class _ChatPageState extends State<ChatPage> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.white,
+    Color color = AppColors.textPrimary,
   }) {
     return ListTile(
       leading: Icon(
         icon,
-        color: color == Colors.white ? Colors.white70 : color,
+        color: color == AppColors.textPrimary ? AppColors.textSecondary : color,
         size: 22,
       ),
       title: Text(title, style: GoogleFonts.inter(color: color, fontSize: 15)),
@@ -1356,21 +1358,21 @@ class _ChatPageState extends State<ChatPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Report Message?',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: Text(
           'Are you sure you want to report this message?',
-          style: GoogleFonts.inter(color: Colors.white70),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -1378,7 +1380,7 @@ class _ChatPageState extends State<ChatPage> {
               Navigator.pop(dialogContext);
               _reportMessage(messageId);
             },
-            child: Text('Report', style: GoogleFonts.inter(color: Colors.red)),
+            child: Text('Report', style: GoogleFonts.inter(color: AppColors.danger)),
           ),
         ],
       ),
@@ -1390,7 +1392,7 @@ class _ChatPageState extends State<ChatPage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1406,7 +1408,7 @@ class _ChatPageState extends State<ChatPage> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppColors.ink.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1414,7 +1416,7 @@ class _ChatPageState extends State<ChatPage> {
                   Text(
                     'Delete Message',
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1422,16 +1424,16 @@ class _ChatPageState extends State<ChatPage> {
                 ],
               ),
             ),
-            const Divider(color: Colors.white24, height: 1),
+            const Divider(color: AppColors.border, height: 1),
             ListTile(
               leading: const Icon(
                 Icons.delete_outline,
-                color: Colors.red,
+                color: AppColors.danger,
                 size: 22,
               ),
               title: Text(
                 'Delete for Me',
-                style: GoogleFonts.inter(color: Colors.white),
+                style: GoogleFonts.inter(color: AppColors.textPrimary),
               ),
               onTap: () {
                 Navigator.pop(modalContext);
@@ -1442,12 +1444,12 @@ class _ChatPageState extends State<ChatPage> {
               ListTile(
                 leading: const Icon(
                   Icons.delete_sweep,
-                  color: Colors.red,
+                  color: AppColors.danger,
                   size: 22,
                 ),
                 title: Text(
                   'Delete for Everyone',
-                  style: GoogleFonts.inter(color: Colors.white),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                 ),
                 onTap: () {
                   Navigator.pop(modalContext);
@@ -1467,21 +1469,21 @@ class _ChatPageState extends State<ChatPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Delete for Everyone?',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: Text(
           'This will remove the message for everyone in the chat.',
-          style: GoogleFonts.inter(color: Colors.white70),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -1489,7 +1491,7 @@ class _ChatPageState extends State<ChatPage> {
               Navigator.pop(dialogContext);
               _deleteMessageForEveryone(messageId);
             },
-            child: Text('Delete', style: GoogleFonts.inter(color: Colors.red)),
+            child: Text('Delete', style: GoogleFonts.inter(color: AppColors.danger)),
           ),
         ],
       ),
@@ -1517,7 +1519,7 @@ class _ChatPageState extends State<ChatPage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1534,7 +1536,7 @@ class _ChatPageState extends State<ChatPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: AppColors.ink.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -1545,13 +1547,13 @@ class _ChatPageState extends State<ChatPage> {
                         Text(
                           'Chat Options',
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white),
+                          icon: const Icon(Icons.close, color: AppColors.textPrimary),
                           onPressed: () => Navigator.pop(modalContext),
                         ),
                       ],
@@ -1559,7 +1561,7 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
               ),
-              const Divider(color: Colors.white24, height: 1),
+              const Divider(color: AppColors.border, height: 1),
               _buildMenuItem(
                 icon: Icons.info_outline,
                 title: 'View Contact Info',
@@ -1585,11 +1587,11 @@ class _ChatPageState extends State<ChatPage> {
                   _toggleSearch();
                 },
               ),
-              const Divider(color: Colors.white24, height: 1),
+              const Divider(color: AppColors.border, height: 1),
               _buildMenuItem(
                 icon: Icons.report_outlined,
                 title: 'Report ${widget.otherUser['name'] ?? 'User'}',
-                color: Colors.red,
+                color: AppColors.danger,
                 onTap: () {
                   Navigator.pop(modalContext);
                   _showReportUserDialog();
@@ -1599,7 +1601,7 @@ class _ChatPageState extends State<ChatPage> {
               _buildMenuItem(
                 icon: Icons.delete_outline,
                 title: 'Delete chat',
-                color: Colors.red,
+                color: AppColors.danger,
                 onTap: () {
                   Navigator.pop(modalContext);
                   _showDeleteChatDialog();
@@ -1619,21 +1621,21 @@ class _ChatPageState extends State<ChatPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Report ${widget.otherUser['name'] ?? 'User'}?',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: Text(
           'Are you sure you want to report this user?',
-          style: GoogleFonts.inter(color: Colors.white70),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -1659,7 +1661,7 @@ class _ChatPageState extends State<ChatPage> {
                 }
               }
             },
-            child: Text('Report', style: GoogleFonts.inter(color: Colors.red)),
+            child: Text('Report', style: GoogleFonts.inter(color: AppColors.danger)),
           ),
         ],
       ),
@@ -1672,21 +1674,21 @@ class _ChatPageState extends State<ChatPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Delete Chat?',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: Text(
           'Delete chat history on your device only? The other person will still have the chat.',
-          style: GoogleFonts.inter(color: Colors.white70),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -1728,7 +1730,7 @@ class _ChatPageState extends State<ChatPage> {
                 }
               }
             },
-            child: Text('Delete', style: GoogleFonts.inter(color: Colors.red)),
+            child: Text('Delete', style: GoogleFonts.inter(color: AppColors.danger)),
           ),
         ],
       ),
@@ -1738,7 +1740,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       appBar: _buildChatAppBar(),
       body: GestureDetector(
         onTap: () {
@@ -1747,13 +1749,7 @@ class _ChatPageState extends State<ChatPage> {
           }
         },
         child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.black, Color(0xFF0A0A0A), Colors.black],
-            ),
-          ),
+          color: AppColors.background,
           child: Column(
             children: [
               if (_showSearchBar) _buildSearchBar(),
@@ -1780,10 +1776,10 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1792,7 +1788,7 @@ class _ChatPageState extends State<ChatPage> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: const Icon(Icons.close, color: AppColors.textPrimary),
             onPressed: _cancelSelection,
             splashRadius: 24,
           ),
@@ -1800,14 +1796,14 @@ class _ChatPageState extends State<ChatPage> {
           Text(
             '${_selectedMessages.length} selected',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
           const Spacer(),
           IconButton(
-            icon: const Icon(Icons.forward, color: Colors.white),
+            icon: const Icon(Icons.forward, color: AppColors.textPrimary),
             onPressed: _forwardMessages,
             tooltip: 'Forward',
             splashRadius: 24,
@@ -1821,8 +1817,8 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A1A1A),
-        border: Border(top: BorderSide(color: Colors.white24)),
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -1830,7 +1826,7 @@ class _ChatPageState extends State<ChatPage> {
             width: 4,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1565C0),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1843,7 +1839,7 @@ class _ChatPageState extends State<ChatPage> {
                 Text(
                   'Replying to ${_replyingTo!.isSentByMe ? 'yourself' : widget.otherUser['name'] ?? 'User'}',
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF1565C0),
+                    color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1853,7 +1849,7 @@ class _ChatPageState extends State<ChatPage> {
                   _replyingTo!.text.length > 50
                       ? '${_replyingTo!.text.substring(0, 50)}...'
                       : _replyingTo!.text,
-                  style: GoogleFonts.inter(color: Colors.white70, fontSize: 14),
+                  style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1861,7 +1857,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white70),
+            icon: const Icon(Icons.close, color: AppColors.textSecondary),
             onPressed: _cancelReply,
             splashRadius: 24,
           ),
@@ -1874,10 +1870,10 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1885,18 +1881,18 @@ class _ChatPageState extends State<ChatPage> {
       ),
       child: TextField(
         controller: _searchController,
-        style: GoogleFonts.inter(color: Colors.white),
+        style: GoogleFonts.inter(color: AppColors.textPrimary),
         autofocus: true,
         decoration: InputDecoration(
           hintText: 'Search messages...',
-          hintStyle: GoogleFonts.inter(color: Colors.white54),
-          prefixIcon: const Icon(Icons.search, color: Colors.white70),
+          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
+          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.close, color: Colors.white70),
+            icon: const Icon(Icons.close, color: AppColors.textSecondary),
             onPressed: _toggleSearch,
           ),
           filled: true,
-          fillColor: const Color(0xFF2A2A2A),
+          fillColor: AppColors.surfaceAlt,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(25),
             borderSide: BorderSide.none,
@@ -1915,7 +1911,7 @@ class _ChatPageState extends State<ChatPage> {
       return const Center(
         child: Text(
           'Authentication error',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
       );
     }
@@ -1932,7 +1928,7 @@ class _ChatPageState extends State<ChatPage> {
           return Center(
             child: Text(
               'Error loading messages',
-              style: GoogleFonts.inter(color: Colors.red),
+              style: GoogleFonts.inter(color: AppColors.danger),
             ),
           );
         }
@@ -1940,7 +1936,7 @@ class _ChatPageState extends State<ChatPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1565C0)),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
           );
         }
@@ -1953,12 +1949,12 @@ class _ChatPageState extends State<ChatPage> {
                 Icon(
                   Icons.chat_bubble_outline,
                   size: 64,
-                  color: Colors.white.withOpacity(0.3),
+                  color: AppColors.ink.withOpacity(0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Say hello! 👋',
-                  style: GoogleFonts.inter(color: Colors.white54, fontSize: 18),
+                  style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 18),
                 ),
               ],
             ),
@@ -1989,12 +1985,12 @@ class _ChatPageState extends State<ChatPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.search_off, size: 64, color: Colors.white54),
+                  const Icon(Icons.search_off, size: 64, color: AppColors.textMuted),
                   const SizedBox(height: 16),
                   Text(
                     'No messages found',
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                       fontSize: 16,
                     ),
                   ),
@@ -2085,10 +2081,10 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -2101,13 +2097,13 @@ class _ChatPageState extends State<ChatPage> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1565C0)),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
           ),
           const SizedBox(width: 12),
           Text(
             'Uploading image...',
-            style: GoogleFonts.inter(color: Colors.white70),
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -2117,7 +2113,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildEmojiPicker() {
     return Container(
       height: 250,
-      color: const Color(0xFF1A1A1A),
+      color: AppColors.surface,
       child: Column(
         children: [
           Padding(
@@ -2128,13 +2124,13 @@ class _ChatPageState extends State<ChatPage> {
                 Text(
                   'Emojis',
                   style: GoogleFonts.inter(
-                    color: Colors.white70,
+                    color: AppColors.textSecondary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white70),
+                  icon: const Icon(Icons.close, color: AppColors.textSecondary),
                   onPressed: () {
                     setState(() => _showEmojiPicker = false);
                   },
@@ -2171,34 +2167,28 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  AppBar _buildChatAppBar() {
-    return AppBar(
-      backgroundColor: const Color(0xFF1A1A1A),
-      elevation: 0,
+  PreferredSizeWidget _buildChatAppBar() {
+    return VAppBar(
       leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new,
-          color: Colors.white,
-          size: 20,
-        ),
+        icon: const Icon(Icons.arrow_back, size: 22),
         onPressed: () => Navigator.pop(context),
         splashRadius: 24,
       ),
       titleSpacing: 0,
-      title: GestureDetector(
+      titleWidget: GestureDetector(
         onTap: _showContactInfo,
         child: Row(
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: AppColors.onPrimary.withOpacity(0.2),
               backgroundImage: widget.otherUser['photoUrl'] != null
                   ? NetworkImage(widget.otherUser['photoUrl']!)
                   : null,
               child: widget.otherUser['photoUrl'] == null
                   ? Icon(
                       widget.isGroup ? Icons.group : Icons.person,
-                      color: Colors.white54,
+                      color: AppColors.onPrimary,
                       size: 20,
                     )
                   : null,
@@ -2213,9 +2203,9 @@ class _ChatPageState extends State<ChatPage> {
                         widget.otherUser['groupName']?.toString() ??
                         'User',
                     style: GoogleFonts.inter(
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -2231,36 +2221,35 @@ class _ChatPageState extends State<ChatPage> {
                             "offline",
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.7),
+                              color: AppColors.onPrimary.withOpacity(0.75),
                             ),
                           );
                         }
                         final data =
                             snapshot.data!.data() as Map<String, dynamic>;
                         final isOnline = data['isOnline'] ?? false;
-                        final lastSeen = data['lastSeen'] as Timestamp?;
-                        if (isOnline) {
-                          return Text(
-                            "Present",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.green,
+                        return Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: isOnline
+                                    ? const Color(0xFF5BE38D)
+                                    : const Color(0xFFFF8A8A),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          );
-                        } else {
-                          return Text(
-                            "Absent",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: const Color.fromARGB(
-                                255,
-                                241,
-                                53,
-                                53,
-                              ).withOpacity(0.7),
+                            const SizedBox(width: 5),
+                            Text(
+                              isOnline ? "Present" : "Absent",
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.onPrimary.withOpacity(0.85),
+                              ),
                             ),
-                          );
-                        }
+                          ],
+                        );
                       },
                     )
                   else
@@ -2268,7 +2257,7 @@ class _ChatPageState extends State<ChatPage> {
                       "group chat",
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppColors.onPrimary.withOpacity(0.75),
                       ),
                     ),
                 ],
@@ -2279,7 +2268,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white, size: 22),
+          icon: const Icon(Icons.more_vert, size: 22),
           onPressed: _showChatOptions,
           splashRadius: 24,
         ),
@@ -2318,19 +2307,20 @@ class _MessageBubble extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A2A2A),
+            color: AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.block, color: Colors.white54, size: 16),
+              const Icon(Icons.block, color: AppColors.textMuted, size: 16),
               const SizedBox(width: 8),
               Text(
                 'This message was deleted',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: Colors.white54,
+                  color: AppColors.textMuted,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -2360,10 +2350,10 @@ class _MessageBubble extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.2),
+                        color: AppColors.warning.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.amber.withOpacity(0.5),
+                          color: AppColors.warning.withOpacity(0.5),
                         ),
                       ),
                       child: Row(
@@ -2372,14 +2362,14 @@ class _MessageBubble extends StatelessWidget {
                           const Icon(
                             Icons.push_pin,
                             size: 10,
-                            color: Colors.amber,
+                            color: AppColors.warning,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'Pinned',
                             style: GoogleFonts.inter(
                               fontSize: 9,
-                              color: Colors.amber,
+                              color: AppColors.warning,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -2389,7 +2379,7 @@ class _MessageBubble extends StatelessWidget {
                   if (message.isPinned && message.isStarred)
                     const SizedBox(width: 6),
                   if (message.isStarred)
-                    const Icon(Icons.star, size: 14, color: Colors.amber),
+                    const Icon(Icons.star, size: 14, color: AppColors.warning),
                 ],
               ),
             ),
@@ -2407,8 +2397,8 @@ class _MessageBubble extends StatelessWidget {
                     child: Icon(
                       isSelected ? Icons.check_circle : Icons.circle_outlined,
                       color: isSelected
-                          ? const Color(0xFF1565C0)
-                          : Colors.white54,
+                          ? AppColors.primary
+                          : AppColors.textMuted,
                       size: 24,
                     ),
                   ),
@@ -2423,9 +2413,7 @@ class _MessageBubble extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isMe
-                          ? const Color(0xFF1565C0)
-                          : const Color(0xFF2A2A2A),
+                      color: isMe ? AppColors.primary : AppColors.surface,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(18),
                         topRight: const Radius.circular(18),
@@ -2438,7 +2426,7 @@ class _MessageBubble extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withOpacity(0.08),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -2455,7 +2443,7 @@ class _MessageBubble extends StatelessWidget {
                               message.senderName!,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: const Color(0xFF64B5F6),
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -2469,7 +2457,7 @@ class _MessageBubble extends StatelessWidget {
                                 Icon(
                                   Icons.forward,
                                   size: 14,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: (isMe ? AppColors.onPrimary : AppColors.textPrimary).withOpacity(0.7),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -2478,7 +2466,7 @@ class _MessageBubble extends StatelessWidget {
                                       : 'Forwarded',
                                   style: GoogleFonts.inter(
                                     fontSize: 11,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: (isMe ? AppColors.onPrimary : AppColors.textPrimary).withOpacity(0.7),
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
@@ -2490,11 +2478,14 @@ class _MessageBubble extends StatelessWidget {
                             padding: const EdgeInsets.all(8),
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
+                              color: (isMe ? AppColors.onPrimary : AppColors.primary)
+                                  .withOpacity(0.12),
                               borderRadius: BorderRadius.circular(8),
-                              border: const Border(
+                              border: Border(
                                 left: BorderSide(
-                                  color: Color(0xFF1565C0),
+                                  color: isMe
+                                      ? AppColors.onPrimary
+                                      : AppColors.primary,
                                   width: 3,
                                 ),
                               ),
@@ -2505,7 +2496,9 @@ class _MessageBubble extends StatelessWidget {
                                   : message.replyToText!,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: Colors.white70,
+                                color: isMe
+                                    ? AppColors.onPrimary.withOpacity(0.85)
+                                    : AppColors.textSecondary,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -2527,11 +2520,11 @@ class _MessageBubble extends StatelessWidget {
                                       if (loadingProgress == null) return child;
                                       return Container(
                                         height: 150,
-                                        color: Colors.white.withOpacity(0.1),
+                                        color: AppColors.ink.withOpacity(0.1),
                                         child: const Center(
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Color(0xFF1565C0),
+                                            color: AppColors.primary,
                                           ),
                                         ),
                                       );
@@ -2539,11 +2532,11 @@ class _MessageBubble extends StatelessWidget {
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     height: 150,
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: AppColors.ink.withOpacity(0.1),
                                     child: const Center(
                                       child: Icon(
                                         Icons.broken_image,
-                                        color: Colors.white54,
+                                        color: AppColors.textMuted,
                                         size: 48,
                                       ),
                                     ),
@@ -2558,8 +2551,10 @@ class _MessageBubble extends StatelessWidget {
                             child: Text(
                               message.text,
                               style: GoogleFonts.inter(
-                                fontSize: 16,
-                                color: Colors.white,
+                                fontSize: 15,
+                                color: isMe
+                                    ? AppColors.onPrimary
+                                    : AppColors.textPrimary,
                               ),
                             ),
                           ),
@@ -2571,7 +2566,8 @@ class _MessageBubble extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
+                              color: (isMe ? AppColors.onPrimary : AppColors.ink)
+                                  .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Wrap(
@@ -2594,7 +2590,7 @@ class _MessageBubble extends StatelessWidget {
                                 'Edited • ',
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: (isMe ? AppColors.onPrimary : AppColors.textPrimary).withOpacity(0.55),
                                   fontStyle: FontStyle.italic,
                                 ),
                               ),
@@ -2603,7 +2599,7 @@ class _MessageBubble extends StatelessWidget {
                               DateFormat('h:mm a').format(message.timestamp),
                               style: GoogleFonts.inter(
                                 fontSize: 11,
-                                color: Colors.white.withOpacity(0.7),
+                                color: (isMe ? AppColors.onPrimary : AppColors.textPrimary).withOpacity(0.7),
                               ),
                             ),
                           ],
@@ -2652,15 +2648,15 @@ class _DateSeparator extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         margin: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          border: Border.all(color: AppColors.ink.withOpacity(0.1)),
         ),
         child: Text(
           displayDate,
           style: GoogleFonts.inter(
             fontSize: 12,
-            color: Colors.white70,
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -2690,10 +2686,10 @@ class _ChatInputBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -2705,9 +2701,9 @@ class _ChatInputBar extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: AppColors.ink.withOpacity(0.1)),
                 ),
                 child: Row(
                   children: [
@@ -2716,7 +2712,7 @@ class _ChatInputBar extends StatelessWidget {
                         showEmojiPicker
                             ? Icons.keyboard
                             : Icons.emoji_emotions_outlined,
-                        color: Colors.white70,
+                        color: AppColors.textSecondary,
                         size: 22,
                       ),
                       onPressed: onEmojiPressed,
@@ -2726,10 +2722,10 @@ class _ChatInputBar extends StatelessWidget {
                       child: TextField(
                         controller: messageController,
                         maxLines: null,
-                        style: GoogleFonts.inter(color: Colors.white),
+                        style: GoogleFonts.inter(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           hintText: "Message",
-                          hintStyle: GoogleFonts.inter(color: Colors.white54),
+                          hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 10,
@@ -2748,10 +2744,10 @@ class _ChatInputBar extends StatelessWidget {
             CircleAvatar(
               radius: 24,
               backgroundColor: showSendButton
-                  ? const Color(0xFF1565C0)
-                  : Colors.white.withOpacity(0.15),
+                  ? AppColors.primary
+                  : AppColors.border,
               child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                icon: const Icon(Icons.send, color: AppColors.onPrimary, size: 20),
                 onPressed: showSendButton ? onSendPressed : null,
                 splashRadius: 24,
               ),
@@ -2777,19 +2773,8 @@ class StarredMessagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: Text(
-          'Starred Messages',
-          style: GoogleFonts.inter(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          onPressed: () => Navigator.pop(context),
-          splashRadius: 24,
-        ),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: const VAppBar(title: 'Starred Messages'),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
@@ -2800,7 +2785,7 @@ class StarredMessagesPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1565C0)),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
 
@@ -2809,11 +2794,11 @@ class StarredMessagesPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.danger),
                   const SizedBox(height: 16),
                   Text(
                     'Error loading starred messages',
-                    style: GoogleFonts.inter(color: Colors.red, fontSize: 16),
+                    style: GoogleFonts.inter(color: AppColors.danger, fontSize: 16),
                   ),
                 ],
               ),
@@ -2828,13 +2813,13 @@ class StarredMessagesPage extends StatelessWidget {
                   const Icon(
                     Icons.star_outline,
                     size: 64,
-                    color: Colors.white54,
+                    color: AppColors.textMuted,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No starred messages',
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                       fontSize: 18,
                     ),
                   ),
@@ -2842,7 +2827,7 @@ class StarredMessagesPage extends StatelessWidget {
                   Text(
                     'Star important messages to find them easily',
                     style: GoogleFonts.inter(
-                      color: Colors.white38,
+                      color: AppColors.textMuted,
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -2864,12 +2849,12 @@ class StarredMessagesPage extends StatelessWidget {
               final message = Message.fromMap(doc.id, data, currentUserId);
 
               return Card(
-                color: const Color(0xFF1A1A1A),
+                color: AppColors.surface,
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   leading: const Icon(
                     Icons.star,
-                    color: Colors.amber,
+                    color: AppColors.warning,
                     size: 24,
                   ),
                   title: Text(
@@ -2878,20 +2863,20 @@ class StarredMessagesPage extends StatelessWidget {
                         : message.imageUrl != null
                         ? '📷 Photo'
                         : 'Message',
-                    style: GoogleFonts.inter(color: Colors.white),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
                     DateFormat('MMM d, h:mm a').format(message.timestamp),
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                       fontSize: 12,
                     ),
                   ),
                   trailing: const Icon(
                     Icons.arrow_forward_ios,
-                    color: Colors.white38,
+                    color: AppColors.textMuted,
                     size: 16,
                   ),
                 ),
@@ -2918,19 +2903,8 @@ class PinnedMessagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: Text(
-          'Pinned Messages',
-          style: GoogleFonts.inter(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          onPressed: () => Navigator.pop(context),
-          splashRadius: 24,
-        ),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: const VAppBar(title: 'Pinned Messages'),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
@@ -2941,7 +2915,7 @@ class PinnedMessagesPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1565C0)),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
 
@@ -2950,11 +2924,11 @@ class PinnedMessagesPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.danger),
                   const SizedBox(height: 16),
                   Text(
                     'Error loading pinned messages',
-                    style: GoogleFonts.inter(color: Colors.red, fontSize: 16),
+                    style: GoogleFonts.inter(color: AppColors.danger, fontSize: 16),
                   ),
                 ],
               ),
@@ -2969,13 +2943,13 @@ class PinnedMessagesPage extends StatelessWidget {
                   const Icon(
                     Icons.push_pin_outlined,
                     size: 64,
-                    color: Colors.white54,
+                    color: AppColors.textMuted,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No pinned messages',
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                       fontSize: 18,
                     ),
                   ),
@@ -2983,7 +2957,7 @@ class PinnedMessagesPage extends StatelessWidget {
                   Text(
                     'Pin important messages to find them easily',
                     style: GoogleFonts.inter(
-                      color: Colors.white38,
+                      color: AppColors.textMuted,
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -3005,12 +2979,12 @@ class PinnedMessagesPage extends StatelessWidget {
               final message = Message.fromMap(doc.id, data, currentUserId);
 
               return Card(
-                color: const Color(0xFF1A1A1A),
+                color: AppColors.surface,
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   leading: const Icon(
                     Icons.push_pin,
-                    color: Colors.amber,
+                    color: AppColors.warning,
                     size: 24,
                   ),
                   title: Text(
@@ -3019,20 +2993,20 @@ class PinnedMessagesPage extends StatelessWidget {
                         : message.imageUrl != null
                         ? '📷 Photo'
                         : 'Message',
-                    style: GoogleFonts.inter(color: Colors.white),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
                     DateFormat('MMM d, h:mm a').format(message.timestamp),
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                       fontSize: 12,
                     ),
                   ),
                   trailing: const Icon(
                     Icons.arrow_forward_ios,
-                    color: Colors.white38,
+                    color: AppColors.textMuted,
                     size: 16,
                   ),
                 ),
@@ -3082,25 +3056,25 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Edit About',
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
         ),
         content: TextField(
           controller: aboutController,
-          style: GoogleFonts.inter(color: Colors.white),
+          style: GoogleFonts.inter(color: AppColors.textPrimary),
           maxLines: 3,
           maxLength: 200,
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Enter group description',
-            hintStyle: GoogleFonts.inter(color: Colors.white54),
+            hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              borderSide: BorderSide(color: AppColors.ink.withOpacity(0.3)),
             ),
             focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF1565C0)),
+              borderSide: BorderSide(color: AppColors.primary),
             ),
           ),
         ),
@@ -3109,7 +3083,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: Colors.white70),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -3127,7 +3101,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('About updated successfully'),
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.success,
                         duration: Duration(seconds: 2),
                       ),
                     );
@@ -3137,7 +3111,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Failed to update: $e'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppColors.danger,
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -3149,7 +3123,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
             },
             child: Text(
               'Save',
-              style: GoogleFonts.inter(color: const Color(0xFF1565C0)),
+              style: GoogleFonts.inter(color: AppColors.primary),
             ),
           ),
         ],
@@ -3172,7 +3146,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
 
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surface,
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -3193,7 +3167,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: AppColors.ink.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -3201,7 +3175,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                       Text(
                         'Add Members',
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -3209,7 +3183,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                     ],
                   ),
                 ),
-                const Divider(color: Colors.white24, height: 1),
+                const Divider(color: AppColors.border, height: 1),
                 Expanded(
                   child: availableUsers.isEmpty
                       ? Center(
@@ -3219,12 +3193,12 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               Icon(
                                 Icons.people_outline,
                                 size: 64,
-                                color: Colors.white.withOpacity(0.3),
+                                color: AppColors.ink.withOpacity(0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'No users to add',
-                                style: GoogleFonts.inter(color: Colors.white54),
+                                style: GoogleFonts.inter(color: AppColors.textMuted),
                               ),
                             ],
                           ),
@@ -3240,14 +3214,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
 
                             return ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: Colors.grey.shade700,
+                                backgroundColor: AppColors.primary,
                                 backgroundImage: userData['photoUrl'] != null
                                     ? NetworkImage(userData['photoUrl'])
                                     : null,
                                 child: userData['photoUrl'] == null
                                     ? const Icon(
                                         Icons.person,
-                                        color: Colors.white,
+                                        color: AppColors.onPrimary,
                                         size: 20,
                                       )
                                     : null,
@@ -3255,14 +3229,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               title: Text(
                                 userName,
                                 style: GoogleFonts.inter(
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               subtitle: Text(
                                 userEmail,
                                 style: GoogleFonts.inter(
-                                  color: Colors.white54,
+                                  color: AppColors.textMuted,
                                   fontSize: 12,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -3285,7 +3259,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error loading users: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -3308,7 +3282,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${userData['name'] ?? 'User'} added to group'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -3318,7 +3292,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to add member: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -3329,26 +3303,15 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: Text(
-          'Contact Info',
-          style: GoogleFonts.inter(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          onPressed: () => Navigator.pop(context),
-          splashRadius: 24,
-        ),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: const VAppBar(title: 'Contact Info'),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 40),
             CircleAvatar(
               radius: 60,
-              backgroundColor: Colors.grey.shade700,
+              backgroundColor: AppColors.primary,
               backgroundImage: widget.user['photoUrl'] != null
                   ? NetworkImage(widget.user['photoUrl'])
                   : null,
@@ -3356,7 +3319,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   ? Icon(
                       widget.isGroup ? Icons.group : Icons.person,
                       size: 50,
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                     )
                   : null,
             ),
@@ -3367,7 +3330,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   'Unknown',
               style: GoogleFonts.inter(
                 fontSize: 24,
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -3376,10 +3339,10 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
               widget.user['email']?.toString() ??
                   widget.user['phone']?.toString() ??
                   'No contact info',
-              style: GoogleFonts.inter(fontSize: 16, color: Colors.white70),
+              style: GoogleFonts.inter(fontSize: 16, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 40),
-            const Divider(color: Colors.white24),
+            const Divider(color: AppColors.border),
 
             if (!widget.isGroup) ...[
               Padding(
@@ -3395,16 +3358,16 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                       return ListTile(
                         leading: const Icon(
                           Icons.group,
-                          color: Colors.white70,
+                          color: AppColors.textSecondary,
                           size: 22,
                         ),
                         title: Text(
                           'Groups',
-                          style: GoogleFonts.inter(color: Colors.white),
+                          style: GoogleFonts.inter(color: AppColors.textPrimary),
                         ),
                         subtitle: Text(
                           'Loading...',
-                          style: GoogleFonts.inter(color: Colors.white54),
+                          style: GoogleFonts.inter(color: AppColors.textMuted),
                         ),
                       );
                     }
@@ -3422,14 +3385,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               children: [
                                 const Icon(
                                   Icons.group,
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                   size: 22,
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
                                   'Common Groups',
                                   style: GoogleFonts.inter(
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -3442,14 +3405,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1565C0).withOpacity(0.3),
+                                color: AppColors.primary.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 '$groupCount',
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
-                                  color: const Color(0xFF1565C0),
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -3461,14 +3424,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: AppColors.ink.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
                               child: Text(
                                 'No common groups',
                                 style: GoogleFonts.inter(
-                                  color: Colors.white54,
+                                  color: AppColors.textMuted,
                                   fontSize: 14,
                                 ),
                               ),
@@ -3492,38 +3455,38 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1A1A1A),
+                                  color: AppColors.surface,
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: AppColors.ink.withOpacity(0.1),
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: const Color(0xFF1565C0),
+                                    backgroundColor: AppColors.primary,
                                     child: const Icon(
                                       Icons.group,
-                                      color: Colors.white,
+                                      color: AppColors.onPrimary,
                                       size: 20,
                                     ),
                                   ),
                                   title: Text(
                                     groupName,
                                     style: GoogleFonts.inter(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   subtitle: Text(
                                     '$participantCount member${participantCount != 1 ? 's' : ''}',
                                     style: GoogleFonts.inter(
-                                      color: Colors.white54,
+                                      color: AppColors.textMuted,
                                       fontSize: 12,
                                     ),
                                   ),
                                   trailing: const Icon(
                                     Icons.arrow_forward_ios,
-                                    color: Colors.white38,
+                                    color: AppColors.textMuted,
                                     size: 14,
                                   ),
                                 ),
@@ -3535,35 +3498,35 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   },
                 ),
               ),
-              const Divider(color: Colors.white24),
+              const Divider(color: AppColors.border),
               ListTile(
                 leading: const Icon(
                   Icons.phone,
-                  color: Colors.white70,
+                  color: AppColors.textSecondary,
                   size: 22,
                 ),
                 title: Text(
                   'Phone',
-                  style: GoogleFonts.inter(color: Colors.white),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                 ),
                 subtitle: Text(
                   widget.user['phone']?.toString() ?? 'Not available',
-                  style: GoogleFonts.inter(color: Colors.white54),
+                  style: GoogleFonts.inter(color: AppColors.textMuted),
                 ),
               ),
               ListTile(
                 leading: const Icon(
                   Icons.email,
-                  color: Colors.white70,
+                  color: AppColors.textSecondary,
                   size: 22,
                 ),
                 title: Text(
                   'Email',
-                  style: GoogleFonts.inter(color: Colors.white),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                 ),
                 subtitle: Text(
                   widget.user['email']?.toString() ?? 'Not available',
-                  style: GoogleFonts.inter(color: Colors.white54),
+                  style: GoogleFonts.inter(color: AppColors.textMuted),
                 ),
               ),
             ],
@@ -3579,16 +3542,16 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                     return ListTile(
                       leading: const Icon(
                         Icons.info_outline,
-                        color: Colors.white70,
+                        color: AppColors.textSecondary,
                         size: 22,
                       ),
                       title: Text(
                         'About',
-                        style: GoogleFonts.inter(color: Colors.white),
+                        style: GoogleFonts.inter(color: AppColors.textPrimary),
                       ),
                       subtitle: Text(
                         'Loading...',
-                        style: GoogleFonts.inter(color: Colors.white54),
+                        style: GoogleFonts.inter(color: AppColors.textMuted),
                       ),
                     );
                   }
@@ -3603,22 +3566,22 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   return ListTile(
                     leading: const Icon(
                       Icons.info_outline,
-                      color: Colors.white70,
+                      color: AppColors.textSecondary,
                       size: 22,
                     ),
                     title: Text(
                       'About',
-                      style: GoogleFonts.inter(color: Colors.white),
+                      style: GoogleFonts.inter(color: AppColors.textPrimary),
                     ),
                     subtitle: Text(
                       groupDescription,
-                      style: GoogleFonts.inter(color: Colors.white54),
+                      style: GoogleFonts.inter(color: AppColors.textMuted),
                     ),
                     trailing: isAdmin
                         ? IconButton(
                             icon: const Icon(
                               Icons.edit,
-                              color: Colors.white70,
+                              color: AppColors.textSecondary,
                               size: 20,
                             ),
                             onPressed: () => _editGroupAbout(groupDescription),
@@ -3628,7 +3591,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   );
                 },
               ),
-              const Divider(color: Colors.white24),
+              const Divider(color: AppColors.border),
               StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('chats')
@@ -3638,7 +3601,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                   if (!snapshot.hasData) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF1565C0),
+                        color: AppColors.primary,
                       ),
                     );
                   }
@@ -3681,16 +3644,16 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                             return ListTile(
                               leading: const Icon(
                                 Icons.person_outline,
-                                color: Colors.white70,
+                                color: AppColors.textSecondary,
                                 size: 22,
                               ),
                               title: Text(
                                 'Created By',
-                                style: GoogleFonts.inter(color: Colors.white),
+                                style: GoogleFonts.inter(color: AppColors.textPrimary),
                               ),
                               subtitle: Text(
                                 creatorName,
-                                style: GoogleFonts.inter(color: Colors.white54),
+                                style: GoogleFonts.inter(color: AppColors.textMuted),
                               ),
                             );
                           },
@@ -3699,19 +3662,19 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                         ListTile(
                           leading: const Icon(
                             Icons.calendar_today,
-                            color: Colors.white70,
+                            color: AppColors.textSecondary,
                             size: 22,
                           ),
                           title: Text(
                             'Created On',
-                            style: GoogleFonts.inter(color: Colors.white),
+                            style: GoogleFonts.inter(color: AppColors.textPrimary),
                           ),
                           subtitle: Text(
                             DateFormat('MMMM d, y').format(createdAt.toDate()),
-                            style: GoogleFonts.inter(color: Colors.white54),
+                            style: GoogleFonts.inter(color: AppColors.textMuted),
                           ),
                         ),
-                      const Divider(color: Colors.white24),
+                      const Divider(color: AppColors.border),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -3723,7 +3686,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                             Text(
                               'Members (${participants.length})',
                               style: GoogleFonts.inter(
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -3734,7 +3697,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                   _searchQuery.isEmpty
                                       ? Icons.search
                                       : Icons.close,
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                   size: 22,
                                 ),
                                 onPressed: () {
@@ -3757,19 +3720,19 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: TextField(
                             controller: _searchController,
-                            style: GoogleFonts.inter(color: Colors.white),
+                            style: GoogleFonts.inter(color: AppColors.textPrimary),
                             autofocus: true,
                             decoration: InputDecoration(
                               hintText: 'Search members...',
                               hintStyle: GoogleFonts.inter(
-                                color: Colors.white54,
+                                color: AppColors.textMuted,
                               ),
                               prefixIcon: const Icon(
                                 Icons.search,
-                                color: Colors.white70,
+                                color: AppColors.textSecondary,
                               ),
                               filled: true,
-                              fillColor: const Color(0xFF2A2A2A),
+                              fillColor: AppColors.surfaceAlt,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(25),
                                 borderSide: BorderSide.none,
@@ -3805,16 +3768,16 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                   ConnectionState.waiting) {
                                 return ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: Colors.grey.shade700,
+                                    backgroundColor: AppColors.primary,
                                     child: const CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Colors.white54,
+                                      color: AppColors.onPrimary,
                                     ),
                                   ),
                                   title: Text(
                                     'Loading...',
                                     style: GoogleFonts.inter(
-                                      color: Colors.white54,
+                                      color: AppColors.textMuted,
                                     ),
                                   ),
                                 );
@@ -3846,14 +3809,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
 
                               return ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.grey.shade700,
+                                  backgroundColor: AppColors.primary,
                                   backgroundImage: userData['photoUrl'] != null
                                       ? NetworkImage(userData['photoUrl'])
                                       : null,
                                   child: userData['photoUrl'] == null
                                       ? const Icon(
                                           Icons.person,
-                                          color: Colors.white,
+                                          color: AppColors.onPrimary,
                                           size: 20,
                                         )
                                       : null,
@@ -3864,7 +3827,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                       child: Text(
                                         isCurrentUser ? 'You' : name,
                                         style: GoogleFonts.inter(
-                                          color: Colors.white,
+                                          color: AppColors.textPrimary,
                                           fontWeight: isCurrentUser
                                               ? FontWeight.bold
                                               : FontWeight.normal,
@@ -3878,21 +3841,21 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF1565C0,
-                                          ).withOpacity(0.2),
+                                          color: AppColors.primary.withOpacity(
+                                            0.12,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
                                           border: Border.all(
-                                            color: const Color(0xFF1565C0),
+                                            color: AppColors.primary,
                                           ),
                                         ),
                                         child: Text(
                                           'Admin',
                                           style: GoogleFonts.inter(
                                             fontSize: 10,
-                                            color: const Color(0xFF1565C0),
+                                            color: AppColors.primary,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -3902,7 +3865,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                 subtitle: Text(
                                   email,
                                   style: GoogleFonts.inter(
-                                    color: Colors.white54,
+                                    color: AppColors.textMuted,
                                     fontSize: 12,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -3911,9 +3874,9 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                     ? PopupMenuButton<String>(
                                         icon: const Icon(
                                           Icons.more_vert,
-                                          color: Colors.white70,
+                                          color: AppColors.textSecondary,
                                         ),
-                                        color: const Color(0xFF1A1A1A),
+                                        color: AppColors.surface,
                                         onSelected: (value) async {
                                           if (value == 'remove') {
                                             final confirm = await showDialog<bool>(
@@ -3921,17 +3884,17 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                               builder: (dialogContext) =>
                                                   AlertDialog(
                                                     backgroundColor:
-                                                        const Color(0xFF1A1A1A),
+                                                        AppColors.surface,
                                                     title: Text(
                                                       'Remove Member?',
                                                       style: GoogleFonts.inter(
-                                                        color: Colors.white,
+                                                        color: AppColors.textPrimary,
                                                       ),
                                                     ),
                                                     content: Text(
                                                       'Are you sure you want to remove $name from this group?',
                                                       style: GoogleFonts.inter(
-                                                        color: Colors.white70,
+                                                        color: AppColors.textSecondary,
                                                       ),
                                                     ),
                                                     actions: [
@@ -3945,8 +3908,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                                           'Cancel',
                                                           style:
                                                               GoogleFonts.inter(
-                                                                color: Colors
-                                                                    .white70,
+                                                                color: AppColors.textSecondary,
                                                               ),
                                                         ),
                                                       ),
@@ -3961,7 +3923,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                                           style:
                                                               GoogleFonts.inter(
                                                                 color:
-                                                                    Colors.red,
+                                                                    AppColors.danger,
                                                               ),
                                                         ),
                                                       ),
@@ -3990,7 +3952,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                                         '$name removed from group',
                                                       ),
                                                       backgroundColor:
-                                                          Colors.green,
+                                                          AppColors.success,
                                                       duration: const Duration(
                                                         seconds: 2,
                                                       ),
@@ -4007,7 +3969,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                                         'Failed to remove member: $e',
                                                       ),
                                                       backgroundColor:
-                                                          Colors.red,
+                                                          AppColors.danger,
                                                       duration: const Duration(
                                                         seconds: 2,
                                                       ),
@@ -4025,14 +3987,14 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                               children: [
                                                 const Icon(
                                                   Icons.person_remove,
-                                                  color: Colors.red,
+                                                  color: AppColors.danger,
                                                   size: 20,
                                                 ),
                                                 const SizedBox(width: 12),
                                                 Text(
                                                   'Remove from group',
                                                   style: GoogleFonts.inter(
-                                                    color: Colors.red,
+                                                    color: AppColors.danger,
                                                   ),
                                                 ),
                                               ],
@@ -4062,8 +4024,8 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1565C0),
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.onPrimary,
                               minimumSize: const Size(double.infinity, 48),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -4081,17 +4043,17 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (dialogContext) => AlertDialog(
-                                  backgroundColor: const Color(0xFF1A1A1A),
+                                  backgroundColor: AppColors.surface,
                                   title: Text(
                                     'Leave Group?',
                                     style: GoogleFonts.inter(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   content: Text(
                                     'Are you sure you want to leave this group?',
                                     style: GoogleFonts.inter(
-                                      color: Colors.white70,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                   actions: [
@@ -4101,7 +4063,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                       child: Text(
                                         'Cancel',
                                         style: GoogleFonts.inter(
-                                          color: Colors.white70,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                     ),
@@ -4111,7 +4073,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                       child: Text(
                                         'Leave',
                                         style: GoogleFonts.inter(
-                                          color: Colors.red,
+                                          color: AppColors.danger,
                                         ),
                                       ),
                                     ),
@@ -4138,7 +4100,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                         content: Text(
                                           'Left group successfully',
                                         ),
-                                        backgroundColor: Colors.green,
+                                        backgroundColor: AppColors.success,
                                         duration: Duration(seconds: 2),
                                       ),
                                     );
@@ -4148,7 +4110,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text('Failed to leave: $e'),
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: AppColors.danger,
                                         duration: const Duration(seconds: 2),
                                       ),
                                     );
@@ -4164,8 +4126,8 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade700,
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.danger,
+                              foregroundColor: AppColors.onPrimary,
                               minimumSize: const Size(double.infinity, 48),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

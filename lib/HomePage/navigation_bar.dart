@@ -1,91 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:v_connect/Calendar/calendar.dart';
 import 'package:v_connect/Profile/profile.dart';
 import 'package:v_connect/Search/search_page.dart';
 import 'package:v_connect/Chat/chat_home_page.dart';
+import 'package:v_connect/theme/app_theme.dart';
 
-class NavigationBar extends StatefulWidget {
+/// Bottom bar on the dashboard. "Home" is the current page; every other
+/// item pushes its screen on top so the back button returns here.
+class NavigationBar extends StatelessWidget {
   const NavigationBar({super.key});
 
-  @override
-  State<NavigationBar> createState() => _NavigationBarState();
-}
-
-class _NavigationBarState extends State<NavigationBar> {
-  int selectedIndex = 0; // Home is selected by default
-
-  void _onItemTapped(int index) {
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const CalendarPage()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfilePage()),
-      );
-    } else if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SearchPage()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ChatHomePage()),
-      );
-    }
-
-    setState(() {
-      selectedIndex = index;
-    });
+  void _onItemTapped(BuildContext context, int index) {
+    final Widget? page = switch (index) {
+      1 => const SearchPage(),
+      2 => const CalendarPage(),
+      3 => const ChatHomePage(),
+      4 => const ProfilePage(),
+      _ => null,
+    };
+    if (page == null) return;
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // MODIFICATION: Matched margin, decoration, border, and shadow from calendar cards
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      height: 65,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A), // Exact card color from reference
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // MODIFICATION: Wrapped each icon in Expanded to prevent overflow
-            _buildIcon(Icons.search, 0),
-            _buildIcon(Icons.calendar_today, 1),
-            _buildIcon(Icons.message, 2),
-            _buildIcon(Icons.person, 3),
-          ],
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 62,
+          child: Row(
+            children: [
+              _buildItem(context, Icons.home_rounded, 'Home', 0),
+              _buildItem(context, Icons.search, 'Search', 1),
+              _buildItem(context, Icons.calendar_today, 'Events', 2),
+              _buildItem(context, Icons.message, 'Messages', 3),
+              _buildItem(context, Icons.person, 'Profile', 4),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildIcon(IconData icon, int index) {
-    bool isSelected = selectedIndex == index;
+  Widget _buildItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int index,
+  ) {
+    final bool isSelected = index == 0;
+    final color = isSelected ? AppColors.primary : AppColors.textMuted;
     return Expanded(
-      child: IconButton(
-        icon: Icon(icon),
-        iconSize: 26,
-        color: Colors.white.withOpacity(
-          0.5,
-        ), // Subtle color change for selection
-        onPressed: () => _onItemTapped(index),
+      child: InkWell(
+        onTap: () => _onItemTapped(context, index),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withOpacity(0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: color,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
